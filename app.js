@@ -15,7 +15,6 @@ const reportRoutes = require('./routes/reportRoutes');
 
 const {clear_otp} = require('./controller/otpController');
 
-const wss = new WebSocket.Server({ port: 8080 });
 
 app = express();
 
@@ -39,8 +38,9 @@ const PORT = 4000;
 app.listen(PORT, () => {
     console.log(`Server running on PORT ${PORT}`);
 });
+const wss = new WebSocket.Server({port:8080});
 
-wss.on('connection', (ws) => {
+wss.on('connection', function connection(ws) {
     console.log('New client connected');
 
     ws.send ('Connected!');
