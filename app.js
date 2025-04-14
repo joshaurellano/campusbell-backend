@@ -38,7 +38,7 @@ const PORT = 4000;
 app.listen(PORT, () => {
     console.log(`Server running on PORT ${PORT}`);
 });
-const wss = new WebSocket.Server({port:8080});
+const wss = new WebSocket.Server({port:80});
 
 wss.on('connection', function connection(ws) {
     console.log('New client connected');
@@ -57,7 +57,7 @@ wss.on('connection', function connection(ws) {
     });
 });
 
-console.log('WebSoket Server running on ws://localhost:8080');
+console.log('WebSocket Server running on Port 80');
 cron.schedule ('* * * * Sunday', async () =>{
     try{
         console.log("cron job working");
