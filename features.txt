@@ -1,0 +1,45 @@
+************************************************************
+CAMPUS BELL
+************************************************************
+
+04/04/2025 
+Project Started
+
+- This note is for backend of Campus Bell
+- This serves as my progress tracker as i go continue to develop campus bell
+************************************************************
+Features added
+************************************************************
+As of :
+04/13/2025
+- Added few modifications on email responses
+- Added OTP authentication for new users
+- Enable logged in authentication 
+- Add the adminAuthentication
+- Finish report controllers
+- Fixed errors 
+- Removed unnecessary else statements
+04/12/2025
+- Report Controller and routes (unable to finished within the day)
+- Reply Controller and routes
+04/11/2025
+- Added User Controller
+- Add validations
+- Post and Comment controllers and routes
+04/10/2025
+- Register 
+- Login (with token) (local storage)
+- OTP creation, saving, verifying
+- mail sending with OTP 
+- middleware for authorized users
+
+
+*************************************************************
+Notes
+*************************************************************
+- Improve email format
+- Add validation middleware
+- finish mvp before committing
+- Store token on cookies
+
+++Joshua Aurellano++
