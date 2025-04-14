@@ -46,12 +46,15 @@ wss.on('connection', function connection(ws) {
     ws.send ('Connected!');
 
     //Listening message from client
-    ws.on('message',(message) => {
-    console.log(`Message Received: ${message}`);
+    ws.on('message',function incoming(message) {
+    console.log(`Message Received:`, message);
 
     ws.send(`Received: ${message}`);
 })
 
+    ws.on('error',function error(err) {
+        console.log('Error: ',err);
+    })
     ws.on('close', () =>{
     console.log('Client Disconnected')
     });
