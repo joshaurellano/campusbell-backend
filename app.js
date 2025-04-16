@@ -2,6 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const cron = require('node-cron');
+
+const dotenv = require('dotenv');
+
 const {WebSocket} = require ('ws');
 
 const authRoutes = require('./routes/authRoutes');
@@ -12,6 +15,8 @@ const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const replyRoutes = require('./routes/replyRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const imgUploadRoutes = require('./routes/imgUploadRoutes');
+const test_imageRoute = require('./routes/test_imageRoute');
 
 const {clear_otp} = require('./controller/otpController');
 
@@ -33,6 +38,8 @@ app.use('/post',postRoutes);
 app.use('/comment',commentRoutes);
 app.use('/reply',replyRoutes);
 app.use('/report',reportRoutes);
+app.use('/upload',imgUploadRoutes);
+app.use('/test',test_imageRoute);
 
 const PORT = 4000;
 app.listen(PORT, () => {
@@ -40,16 +47,18 @@ app.listen(PORT, () => {
 });
 const wss = new WebSocket.Server({port:80});
 
-wss.on('connection', function connection(ws) {
+wss.on('connection', function connection(ws,req) {
     console.log('New client connected');
-
+    var id = req.headers['sec-websocket-key']
+    console.log(id)
     ws.send ('Connected!');
 
     //Listening message from client
     ws.on('message',function incoming(message) {
     console.log(`Message Received:`, message);
 
-    ws.send(`Received: ${message}`);
+    ws.send(`sender:${id}
+        message: ${message}`);
 })
 
     ws.on('error',function error(err) {
