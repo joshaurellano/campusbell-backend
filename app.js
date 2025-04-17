@@ -3,8 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const cron = require('node-cron');
 
-const dotenv = require('dotenv');
-
+const http = require('http');
 const {WebSocket} = require ('ws');
 
 const authRoutes = require('./routes/authRoutes');
@@ -20,8 +19,8 @@ const test_imageRoute = require('./routes/test_imageRoute');
 
 const {clear_otp} = require('./controller/otpController');
 
-
 app = express();
+const server = http.createServer(app);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -45,7 +44,7 @@ const PORT = 4000;
 app.listen(PORT, () => {
     console.log(`Server running on PORT ${PORT}`);
 });
-const wss = new WebSocket.Server({port:80});
+const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws,req) => {
     console.log('New client connected');
