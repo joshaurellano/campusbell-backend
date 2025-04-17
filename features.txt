@@ -11,6 +11,15 @@ Project Started
 Features added
 ************************************************************
 As of :
+04/16/2025
+- Finished basic setup of multer and image upload controllers with routes
+04/15/2025
+- Start setup multer middleware and image upload controller (unable to finish)
+- Create account on Cloudinary
+04/14/2025
+- Deployed to Render
+- Upload to github
+- Added Websocket
 04/13/2025
 - Added few modifications on email responses
 - Added OTP authentication for new users

@@ -47,27 +47,32 @@ app.listen(PORT, () => {
 });
 const wss = new WebSocket.Server({port:80});
 
-wss.on('connection', function connection(ws,req) {
+wss.on('connection', (ws,req) => {
     console.log('New client connected');
     var id = req.headers['sec-websocket-key']
     console.log(id)
     ws.send ('Connected!');
 
     //Listening message from client
-    ws.on('message',function incoming(message) {
+    ws.on('message',(message) => {
     console.log(`Message Received:`, message);
 
     ws.send(`sender:${id}
         message: ${message}`);
 })
 
-    ws.on('error',function error(err) {
+wss.clients.forEach((client) => {
+    client.send('Broadcast message!');
+  });
+
+    ws.on('error', (err) => {
         console.log('Error: ',err);
     })
     ws.on('close', () =>{
     console.log('Client Disconnected')
     });
 });
+
 
 console.log('WebSocket Server running on Port 80');
 cron.schedule ('* * * * Sunday', async () =>{
