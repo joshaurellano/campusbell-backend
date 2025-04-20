@@ -11,6 +11,10 @@ Project Started
 Features added
 ************************************************************
 As of :
+04/20/2025
+- Added topic controllers and route
+04/19/2025
+- Finished setup of websocket chat functionality
 04/16/2025
 - Finished basic setup of multer and image upload controllers with routes
 04/15/2025
