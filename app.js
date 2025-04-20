@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const mailRoutes = require('./routes/mailRoutes');
 const otpRoutes = require('./routes/otpRoutes');
 const userRoutes = require('./routes/userRoutes');
+const topicRoutes = require('./routes/topicRoutes');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const replyRoutes = require('./routes/replyRoutes');
@@ -15,7 +16,6 @@ const imgUploadRoutes = require('./routes/imgUploadRoutes');
 const test_imageRoute = require('./routes/test_imageRoute');
 
 const {clear_otp} = require('./controller/otpController');
-const{saveChat} = require('./controller/chatController');
 
 app = express();
 
@@ -30,12 +30,15 @@ app.use('/auth',authRoutes);
 app.use('/send',mailRoutes);
 app.use('/otp',otpRoutes);
 app.use('/user',userRoutes);
+app.use('/topic',topicRoutes);
 app.use('/post',postRoutes);
 app.use('/comment',commentRoutes);
 app.use('/reply',replyRoutes);
 app.use('/report',reportRoutes);
 app.use('/upload',imgUploadRoutes);
 app.use('/test',test_imageRoute);
+
+
 
 cron.schedule ('* * * * Sunday', async () =>{
     try{
