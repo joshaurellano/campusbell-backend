@@ -11,6 +11,8 @@ Project Started
 Features added
 ************************************************************
 As of :
+04/21/2025
+- Add comments and replies on post controller
 04/20/2025
 - Added topic controllers and route
 04/19/2025

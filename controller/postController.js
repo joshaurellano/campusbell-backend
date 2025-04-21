@@ -24,14 +24,21 @@ const createNewPost = async (req,res) => {
 /*For function holding all content(post + comments + reply), there is another controller holding that*/
 const getAllPost = async (req,res) => {
     try {
-        const[get_all_post] = await pool.query(`SELECT 
-        u.username AS username,
-        p.post_id AS postID,
-        p.title AS title,
-        p.body AS content,
-        p.created_at AS date_posted,
-        p.updated_at AS date_updated
-        FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id`)
+        const[get_all_post] = await pool.query(`SELECT p.post_id AS postID,
+            u.username AS username,
+            p.title AS title,
+            p.body AS content,
+            p.created_at AS date_posted,
+            p.updated_at AS date_updated,
+            c.body AS comment,
+            c.created_at AS commentPosted,
+            c.updated_at AS commentUpdated,
+            r.body AS reply,
+            r.created_at AS replyPosted,
+            r.updated_at AS replyUpdated
+            FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id
+            INNER JOIN post_comments c ON c.post_id = p.post_id
+            INNER JOIN comment_reply r ON r.post_id = p.post_id`)
         if(get_all_post.length === 0){
             return res.status(404).json({
                 status:'Error',
@@ -56,14 +63,21 @@ const getAllPost = async (req,res) => {
 const getPost = async (req,res) => {
     const{id} = req.params;
     try {
-        const[get_post] = await pool.query(`SELECT 
-            p.post_id AS postID,
-            u.username,
+        const[get_post] = await pool.query(`SELECT p.post_id AS postID,
+            u.username AS username,
             p.title AS title,
             p.body AS content,
             p.created_at AS date_posted,
-            p.updated_at AS date_updated
-            FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id 
+            p.updated_at AS date_updated,
+            c.body AS comment,
+            c.created_at AS commentPosted,
+            c.updated_at AS commentUpdated,
+            r.body AS reply,
+            r.created_at AS replyPosted,
+            r.updated_at AS replyUpdated
+            FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id
+            INNER JOIN post_comments c ON c.post_id = p.post_id
+            INNER JOIN comment_reply r ON r.post_id = p.post_id 
             WHERE p.post_id = ?`,[id]);
         if(get_post.length === 0){
             return res.status(404).json({
