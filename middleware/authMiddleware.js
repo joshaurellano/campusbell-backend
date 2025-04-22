@@ -20,7 +20,7 @@ const authenticateToken = async (req, res, next) => {
                 message:'Not yet verified, please check your email'
             })
         }
-        console.log(req.user.role_id);
+        // console.log(req.user.role_id);
         next();
     } catch(err) {
         res.status(400).json({

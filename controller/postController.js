@@ -24,21 +24,36 @@ const createNewPost = async (req,res) => {
 /*For function holding all content(post + comments + reply), there is another controller holding that*/
 const getAllPost = async (req,res) => {
     try {
-        const[get_all_post] = await pool.query(`SELECT p.post_id AS postID,
-            u.username AS username,
-            p.title AS title,
-            p.body AS content,
-            p.created_at AS date_posted,
-            p.updated_at AS date_updated,
-            c.body AS comment,
-            c.created_at AS commentPosted,
-            c.updated_at AS commentUpdated,
-            r.body AS reply,
-            r.created_at AS replyPosted,
-            r.updated_at AS replyUpdated
-            FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id
-            INNER JOIN post_comments c ON c.post_id = p.post_id
-            INNER JOIN comment_reply r ON r.post_id = p.post_id`)
+        const[get_all_post] = await pool.query(`SELECT 
+        p.post_id AS postID,
+        u.username AS username,
+        p.title AS title,
+        p.body AS content,
+        p.created_at AS date_posted,
+        (
+            SELECT JSON_OBJECTAGG(comment_id,JSON_OBJECT(
+            'commentID',c.comment_id,
+            'username',cu.username,
+            'body',c.body,
+            'date_posted',c.created_at,
+            'replies',
+                (
+                    SELECT JSON_OBJECTAGG(reply_id,
+                    JSON_OBJECT(
+                    'replyID',r.reply_id,
+                    'username',ru.username,
+                    'body',r.body,
+                    'date_posted',r.created_at)) 
+                    FROM comment_reply r LEFT JOIN user_profile ru
+                    ON ru.user_id = r.user_id
+                    WHERE r.comment_id = c.comment_id
+                )
+            ))
+            FROM post_comments c LEFT JOIN user_profile cu 
+            ON c.user_id = cu.user_id
+            WHERE c.post_id = p.post_id
+        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id`)
+
         if(get_all_post.length === 0){
             return res.status(404).json({
                 status:'Error',
@@ -63,22 +78,37 @@ const getAllPost = async (req,res) => {
 const getPost = async (req,res) => {
     const{id} = req.params;
     try {
-        const[get_post] = await pool.query(`SELECT p.post_id AS postID,
-            u.username AS username,
-            p.title AS title,
-            p.body AS content,
-            p.created_at AS date_posted,
-            p.updated_at AS date_updated,
-            c.body AS comment,
-            c.created_at AS commentPosted,
-            c.updated_at AS commentUpdated,
-            r.body AS reply,
-            r.created_at AS replyPosted,
-            r.updated_at AS replyUpdated
-            FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id
-            INNER JOIN post_comments c ON c.post_id = p.post_id
-            INNER JOIN comment_reply r ON r.post_id = p.post_id 
+        const[get_post] = await pool.query(`SELECT 
+        p.post_id AS postID,
+        u.username AS username,
+        p.title AS title,
+        p.body AS content,
+        p.created_at AS date_posted,
+        (
+            SELECT JSON_OBJECTAGG(comment_id,JSON_OBJECT(
+            'commentID',c.comment_id,
+            'username',cu.username,
+            'body',c.body,
+            'date_posted',c.created_at,
+            'replies',
+                (
+                    SELECT JSON_OBJECTAGG(reply_id,
+                    JSON_OBJECT(
+                    'replyID',r.reply_id,
+                    'username',ru.username,
+                    'body',r.body,
+                    'date_posted',r.created_at)) 
+                    FROM comment_reply r LEFT JOIN user_profile ru
+                    ON ru.user_id = r.user_id
+                    WHERE r.comment_id = c.comment_id
+                )
+            ))
+            FROM post_comments c LEFT JOIN user_profile cu 
+            ON c.user_id = cu.user_id
+            WHERE c.post_id = p.post_id
+        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id
             WHERE p.post_id = ?`,[id]);
+
         if(get_post.length === 0){
             return res.status(404).json({
                 status:'Error',

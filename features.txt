@@ -11,6 +11,8 @@ Project Started
 Features added
 ************************************************************
 As of :
+04/22/2025
+- Fixed the error on fetching post with comments and replies
 04/21/2025
 - Add comments and replies on post controller
 04/20/2025
