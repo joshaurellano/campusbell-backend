@@ -31,8 +31,16 @@ const getAllPost = async (req,res) => {
         p.body AS content,
         p.created_at AS date_posted,
         (
+            SELECT COUNT(*) FROM post_comments c WHERE c.post_id = p.post_id
+        ) AS commentCount,
+
+        (
             SELECT JSON_OBJECTAGG(comment_id,JSON_OBJECT(
             'commentID',c.comment_id,
+            'replyCount',
+            (
+                SELECT COUNT(*) FROM comment_reply r WHERE r.comment_id = c.comment_id
+            ),
             'username',cu.username,
             'body',c.body,
             'date_posted',c.created_at,
@@ -52,7 +60,8 @@ const getAllPost = async (req,res) => {
             FROM post_comments c LEFT JOIN user_profile cu 
             ON c.user_id = cu.user_id
             WHERE c.post_id = p.post_id
-        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id`)
+        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id`
+    )
 
         if(get_all_post.length === 0){
             return res.status(404).json({
@@ -85,8 +94,15 @@ const getPost = async (req,res) => {
         p.body AS content,
         p.created_at AS date_posted,
         (
+            SELECT COUNT(*) FROM post_comments c WHERE c.post_id = p.post_id
+        ) AS commentCount,
+        (
             SELECT JSON_OBJECTAGG(comment_id,JSON_OBJECT(
             'commentID',c.comment_id,
+            'replyCount',
+            (
+                SELECT COUNT(*) FROM comment_reply r WHERE r.comment_id = c.comment_id
+            ),
             'username',cu.username,
             'body',c.body,
             'date_posted',c.created_at,
