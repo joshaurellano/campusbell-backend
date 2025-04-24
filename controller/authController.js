@@ -107,6 +107,26 @@ const login = async (req,res) => {
     }
 
 }
+
+const logout = async (req,res) => {
+    try {
+        res.clearCookie('token',{
+            httpOnly:true,
+            secure:true,
+            sameSite:'None'
+        })
+        res.json({
+            status:'Success',
+            message:'Logout successful'
+        })
+    } catch (error) {
+        return res.status(500).json({
+            stattus:'Error',
+            message:'There was an error logging out'
+        })
+    }
+}
+
 const userTokenInfo = async (req, res) => {
     try{
         const token = req.cookies.token;
@@ -126,4 +146,4 @@ const userTokenInfo = async (req, res) => {
     }
 }
 
-module.exports = {register,login,userTokenInfo}
+module.exports = {register,login,logout,userTokenInfo}

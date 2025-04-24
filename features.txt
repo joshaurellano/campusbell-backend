@@ -12,6 +12,7 @@ Features added
 ************************************************************
 As of :
 04/24/2025
+- Add logout functionality
 - Remove test image upload controller
 - Add token request info from frontend to backend
 - Modify cors option to accept all origin links from frontend
