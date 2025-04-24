@@ -11,6 +11,14 @@ Project Started
 Features added
 ************************************************************
 As of :
+04/24/2025
+- Remove test image upload controller
+- Add token request info from frontend to backend
+- Modify cors option to accept all origin links from frontend
+- Change token placement from local storage to cookies
+- Install cookie parser
+04/23/2025
+- Fixed comment and reply count
 04/22/2025
 - Fixed the error on fetching post with comments and replies
 04/21/2025

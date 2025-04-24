@@ -70,11 +70,10 @@ const login = async (req,res) => {
                 message:'Username not found'
             })
         }
-
         const user = usernameResult[0];
-        const checkPassword = await bcrypt.compare(password, user.password);
+        const checkPasswordIfRight = await bcrypt.compare(password, user.password);
 
-        if(!checkPassword){
+        if(!checkPasswordIfRight){
             return res.status(400).json({
                 status:'Error',
                 message:'Wrong Password'
@@ -83,14 +82,22 @@ const login = async (req,res) => {
         const token = jwt.sign({
             user_id: user.user_id,
             username: user.username,
-            role_id: user.role_id
+            role_id: user.role_id,
+            
         }, process.env.JWT_SECRET, {expiresIn: process.env.JWT_ACCESS_EXPIRATION_TIME });
         
-        return res.status(200).json({
-            status: 'Success',
-            message:'Login Successful',
-            token: token
+        res.cookie('token',token,{
+            httpOnly: true,
+            secure: true,
+            //secure:false,
+            //sameSite:'Strict'
+            sameSite:'None',
+            maxAge: 3600000
         });
+
+        return res.status(200).json({
+            status:'Success',
+            message:'Login successful'});
 
     } catch(error) {
         return res.status(500).json({
@@ -100,5 +107,23 @@ const login = async (req,res) => {
     }
 
 }
+const userTokenInfo = async (req, res) => {
+    try{
+        const token = req.cookies.token;
+        // console.log(token)
+        const decoded_token = jwt.verify(token,process.env.JWT_SECRET);
+        res.json({
+            status:'Success',
+            result:decoded_token
+        })
 
-module.exports = {register,login}
+    } catch(error){
+        console.error(error)
+        return res.status(500).json({
+            status:'Error',
+            message:'There was an error getting reading token'
+        })
+    }
+}
+
+module.exports = {register,login,userTokenInfo}

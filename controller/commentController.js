@@ -38,6 +38,7 @@ const getAllComments = async (req,res) => {
         ON c.user_id = u.user_id 
         INNER JOIN user_posts p 
         ON c.post_id = p.post_id`)
+        
         if(get_all_comments.length === 0){
             return res.status(404).json({
                 status:'Error',

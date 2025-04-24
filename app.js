@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const cron = require('node-cron');
+const cookieParser = require('cookie-parser')
 
 const authRoutes = require('./routes/authRoutes');
 const mailRoutes = require('./routes/mailRoutes');
@@ -13,14 +14,25 @@ const commentRoutes = require('./routes/commentRoutes');
 const replyRoutes = require('./routes/replyRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const imgUploadRoutes = require('./routes/imgUploadRoutes');
-const test_imageRoute = require('./routes/test_imageRoute');
 
 const {clear_otp} = require('./controller/otpController');
 
+const corsOptions = {
+	origin: (origin, callback) => {
+	  // Allow all origins or validate here
+	  if (origin) {
+		callback(null, origin); // Allow the current origin
+	  } else {
+		callback(null, '*'); // Allow non-browser requests (e.g., Postman)
+	  }
+	},
+	credentials: true, // Allow credentials
+  };
 app = express();
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors(corsOptions));
+app.use(cookieParser())
 
 app.get('/',function(req,res){
     res.send("Accessing System Backend");
@@ -36,9 +48,6 @@ app.use('/comment',commentRoutes);
 app.use('/reply',replyRoutes);
 app.use('/report',reportRoutes);
 app.use('/upload',imgUploadRoutes);
-app.use('/test',test_imageRoute);
-
-
 
 cron.schedule ('* * * * Sunday', async () =>{
     try{
