@@ -16,6 +16,7 @@ const userValidationRules = () => {
         body('first_name')
         .matches(/^[A-Za-z.-\s]+$/).withMessage('Only letters and characters "," and "-" are allowed'),
         body('middle_name')
+        .optional()
         .matches(/^[A-Za-z.-\s]+$/).withMessage('Only letters and characters "," and "-" are allowed'),
         body('last_name')
         .matches(/^[A-Z a-z.-\s]+$/).withMessage('Only letters and characters "," and "-" are allowed'),
