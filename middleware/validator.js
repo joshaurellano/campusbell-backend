@@ -5,6 +5,8 @@ const {body, validationResult} = require ('express-validator');
 //Validation criteria
 const userValidationRules = () => {
     return [
+        body('username')
+        .isLength({max: 10}).withMessage('Username should be maximum of 10 characters only'),
         body('password')
         .isLength({min: 5}).withMessage('Password should be minimum of 5 characters'),
         body('email')
@@ -12,16 +14,16 @@ const userValidationRules = () => {
         .custom(value =>{
             const result = value.includes("gbox.ncf.edu.ph")
             return result
-        }).withMessage("Only gbox account is accepted \n"),
+        }).withMessage("Only institutional NCF email is accepted \n"),
         body('first_name')
-        .matches(/^[A-Za-z.-\s]+$/).withMessage('Only letters and characters "," and "-" are allowed'),
+        .matches(/^[A-Za-z.-\s]+$/).withMessage('First name only accepts letters and characters "," and "-"'),
         body('middle_name')
         .optional()
-        .matches(/^[A-Za-z.-\s]+$/).withMessage('Only letters and characters "," and "-" are allowed'),
+        .matches(/^[A-Za-z.-\s]+$/).withMessage('Middle name only accepts letters and characters "," and "-"'),
         body('last_name')
-        .matches(/^[A-Z a-z.-\s]+$/).withMessage('Only letters and characters "," and "-" are allowed'),
+        .matches(/^[A-Z a-z.-\s]+$/).withMessage('Last name only accepts letters and characters "," and "-"'),
         body('phone_number')
-        .matches(/^[0-9 - +]+$/).withMessage('Only numbers and character "-" are allowed')
+        .matches(/^[0-9 - +]+$/).withMessage('Phone Number only accepts numbers and character "-"')
         .isLength({min:9,max:13}).withMessage('Phone number should be minimum of 9 characters and maximum of 13 characters')
     ]
 
