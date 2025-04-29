@@ -44,10 +44,19 @@ const register = async (req,res) => {
         //Duplicate entry error handling
         /*Improve function by adding the specific duplicate field */
         if(err.code === 'ER_DUP_ENTRY'){
+            console.error(err.message)
+            if(err.message.includes('email')){
             return res.status(409).json({
                 status:'Error',
-                message:'Duplicate entry detected'
-            });
+                message:'Email already in used'
+                });
+            }
+            else if(err.message.includes('phone_number')){
+            return res.status(409).json({
+                status:'Error',
+                message:'Phone Number already in used'
+                });
+            }
         }
         //Other database error that is not handled here
         else{

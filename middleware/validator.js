@@ -12,7 +12,7 @@ const userValidationRules = () => {
         .custom(value =>{
             const result = value.includes("gbox.ncf.edu.ph")
             return result
-        }).withMessage("Email address is not accepted"),
+        }).withMessage("Only gbox account is accepted \n"),
         body('first_name')
         .matches(/^[A-Za-z.-\s]+$/).withMessage('Only letters and characters "," and "-" are allowed'),
         body('middle_name')
@@ -37,7 +37,7 @@ const validate = (req,res,next) => {
 
     return res.status(422).json({
         status:'Error',
-        errors:validation_errors
+        message:validation_errors
     })
 }
 module.exports = {userValidationRules,validate}
