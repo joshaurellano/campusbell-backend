@@ -3,9 +3,9 @@ const pool = require('../config/database');
 
 //handles post creation function
 const createNewPost = async (req,res) => {
-    const{title, body, user_id} = req.body;
+    const{title, body, user_id, topic_id} = req.body;
     try {
-        const [create_post] = await pool.query(`INSERT INTO user_posts (title,body,user_id) VALUES (?, ?, ?)`,[title,body,user_id]);    
+        const [create_post] = await pool.query(`INSERT INTO user_posts (title,body,user_id,topic_id) VALUES (?, ?, ?)`,[title,body,user_id,topic_id]);    
         return res.status(201).json({
             status:'Success',
             message:'Post successfully created'
@@ -75,7 +75,7 @@ const getAllPost = async (req,res) => {
             result:get_all_post
         })
     } catch (error) {
-        // console.error(error);
+        console.error(error);
         return res.status(500).json({
             status:'Error',
             message:'There was an error getting all posts'
