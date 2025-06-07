@@ -60,7 +60,7 @@ const getAllPost = async (req,res) => {
             FROM post_comments c LEFT JOIN user_profile cu 
             ON c.user_id = cu.user_id
             WHERE c.post_id = p.post_id
-        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id`
+        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id ORDER BY p.created_at DESC`
     )
 
         if(get_all_post.length === 0){
