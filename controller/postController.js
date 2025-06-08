@@ -27,6 +27,7 @@ const getAllPost = async (req,res) => {
         const[get_all_post] = await pool.query(`SELECT 
         p.post_id AS postID,
         u.username AS username,
+        t.topic_name,
         p.title AS title,
         p.body AS content,
         p.created_at AS date_posted,
@@ -60,7 +61,9 @@ const getAllPost = async (req,res) => {
             FROM post_comments c LEFT JOIN user_profile cu 
             ON c.user_id = cu.user_id
             WHERE c.post_id = p.post_id
-        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id ORDER BY p.created_at DESC`
+        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
+        INNER JOIN forum_topics t ON p.topic_id = t.topic_id
+        ORDER BY p.created_at DESC;`
     )
 
         if(get_all_post.length === 0){
@@ -90,12 +93,14 @@ const getPost = async (req,res) => {
         const[get_post] = await pool.query(`SELECT 
         p.post_id AS postID,
         u.username AS username,
+        t.topic_name,
         p.title AS title,
         p.body AS content,
         p.created_at AS date_posted,
         (
             SELECT COUNT(*) FROM post_comments c WHERE c.post_id = p.post_id
         ) AS commentCount,
+
         (
             SELECT JSON_OBJECTAGG(comment_id,JSON_OBJECT(
             'commentID',c.comment_id,
@@ -122,7 +127,8 @@ const getPost = async (req,res) => {
             FROM post_comments c LEFT JOIN user_profile cu 
             ON c.user_id = cu.user_id
             WHERE c.post_id = p.post_id
-        ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id
+            ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
+            INNER JOIN forum_topics t ON p.topic_id = t.topic_id
             WHERE p.post_id = ?`,[id]);
 
         if(get_post.length === 0){
@@ -136,10 +142,10 @@ const getPost = async (req,res) => {
             result:get_post[0]
         })
     } catch (error) {
-         // console.error(error);
+        //  console.error(error);
          return res.status(500).json({
             status:'Error',
-            message:'There was an error getting all posts'
+            message:'There was an error getting the post'
         })
     }
 }
