@@ -4,8 +4,10 @@ const nodemailer = require('nodemailer');
 const Mailgen = require('mailgen');
 const pool = require('../config/database');
 
-const sendMail = async (req,res) => {
-const {email} = req.body;
+const sendMail = async (email,otp) => {
+// const {email} = req.body;
+
+console.log(email, otp)
     try {
         //check for email input and otp key availability
         const [check_if_email_otp_exist] = await pool.query(`SELECT otp.otp_id AS id,
@@ -150,7 +152,7 @@ const {email} = req.body;
                             
                             Here is your otp code ${otpKey}. Please note that it is valid for 10 minutes only.
                             
-                            If you did not request for this change, please update your password and secure your account`,
+                            If you did not request for this change, you can safely ignore this message.`,
                             }
                         ]
                     },
@@ -175,7 +177,7 @@ const {email} = req.body;
         //     status:'Success',
         //     message:'Mail sent successfully'
         // })
-        res.send(response);
+        // res.send(response);
     } catch(error){
         console.error(error);
         throw error

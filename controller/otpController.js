@@ -24,7 +24,7 @@ const generate_otp = async (req,res) => {
         console.log(saveOtp);
         // console.log(user_id);
         // console.log(purpose);
-        // const sendOtpEmail = await sendMail(email,otp)
+        const sendOtpEmail = await sendMail(email,otp)
         // console.log(sendOtpEmail);
 
         return res.status(200).json({

@@ -63,7 +63,7 @@ const getAllPost = async (req,res) => {
             WHERE c.post_id = p.post_id
         ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
         INNER JOIN forum_topics t ON p.topic_id = t.topic_id
-        ORDER BY p.created_at DESC;`
+        ORDER BY p.created_at DESC`
     )
 
         if(get_all_post.length === 0){
