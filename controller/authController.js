@@ -88,6 +88,12 @@ const login = async (req,res) => {
                 message:'Wrong Password'
             });
         }
+        if(user.role_id === 4) {
+            return res.status(401).json({
+                status:'Error',
+                message:'Unverified'
+            })
+        }
         const token = jwt.sign({
             user_id: user.user_id,
             username: user.username,
@@ -109,6 +115,7 @@ const login = async (req,res) => {
             message:'Login successful'});
 
     } catch(error) {
+        console.error(error);
         return res.status(500).json({
             status:'Error',
             message:'There was an error processing your request for login'

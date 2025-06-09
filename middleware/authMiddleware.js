@@ -16,7 +16,7 @@ const authenticateToken = async (req, res, next) => {
         if(req.user.role_id === 4 ){
             return res.status(401).json({
                 status:'Error',
-                message:'Not yet verified, please check your email'
+                message:'Unverified'
             })
         }
         // console.log(req.user.role_id);
