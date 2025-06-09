@@ -35,7 +35,7 @@ console.log(email, otp)
             })
         }
         // console.log(check_if_email_otp_exist[0].otp)
-        const otpKey = check_if_email_otp_exist[0].otp;
+        const otpKey = otp;
         const firstName = check_if_email_otp_exist[0].firstName;
         const purpose = check_if_email_otp_exist[0].purpose;
         let config = {
@@ -63,27 +63,6 @@ console.log(email, otp)
             - Email too generic
         */
        
-        // let response = {
-        //     body: {
-        //         name : `${firstName}`,
-        //         intro: "Your OTP Key",
-        //         table : {
-        //             data : [
-        //                 {
-        //                 message:`
-        //                 Greetings from Campus Bell, <br/><br/>
-
-        //                 We received an OTP request for ${purpose}.<br/><br/>
-                        
-        //                 Here is your otp code ${otpKey}. Please note that it is valid for 10 minutes only.
-                        
-        //                 If you did not request for this change, please update your password and secure your account`,
-        //                 }
-        //             ]
-        //         },
-        //         // outro: "End of message"
-        //     }
-        // }
         let response = null;
         if(purpose === 2) {
             response = {

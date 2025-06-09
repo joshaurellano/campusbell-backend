@@ -7,7 +7,8 @@ const generate_otp = async (req,res) => {
     const otp = Math.floor((Math.random() * 999999)+ 100000);
     const minute = 1000 * 600;
 
-    let expiry = Math.round(Date.now() + minute);
+    console.log(Date.now())
+    let expiry = (Date.now() + minute);
     const expiry_time = new Date(expiry);
     // const time_now = new Date(Date.now());
     try {
@@ -48,7 +49,7 @@ const verify_otp = async (req,res) => {
     const {email,otp} = req.body;
     
     try{
-        const [verify] = await pool.query(`SELECT u.user_id, u.email, o.otp_key, o.expiry, o.purpose_id, o.expiry, u.role_id FROM user_profile u INNER JOIN otp_request o ON u.user_id = o.user_id WHERE u.email = ?`,[email]);
+        const [verify] = await pool.query(`SELECT u.user_id, u.email, o.otp_key,o.created_at, o.expiry, o.purpose_id,u.role_id FROM user_profile u INNER JOIN otp_request o ON u.user_id = o.user_id WHERE u.email = ? ORDER BY o.created_at DESC`,[email]);
         if(verify.affectedRows === 0) {
             return res.status(404).json({
                 status:'Error',
@@ -66,7 +67,8 @@ const verify_otp = async (req,res) => {
             })
         } 
         if(verify[0].otp_key === otp){
-            const[update_role] = await pool.query(`UPDATE user_profile SET role_id = 3`);
+            const id = verify[0].user_id;
+            const[update_role] = await pool.query(`UPDATE user_profile SET role_id = '3' WHERE user_id = ?`,[id]);
             
             return res.status(200).json({
                 status:'Success',
