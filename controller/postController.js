@@ -102,19 +102,19 @@ const getPost = async (req,res) => {
         ) AS commentCount,
 
         (
-            SELECT JSON_OBJECTAGG(comment_id,JSON_OBJECT(
+            SELECT JSON_ARRAYAGG(JSON_OBJECT(
             'commentID',c.comment_id,
             'replyCount',
             (
                 SELECT COUNT(*) FROM comment_reply r WHERE r.comment_id = c.comment_id
             ),
+            'commentID',c.comment_id,
             'username',cu.username,
             'body',c.body,
             'date_posted',c.created_at,
             'replies',
                 (
-                    SELECT JSON_OBJECTAGG(reply_id,
-                    JSON_OBJECT(
+                    SELECT JSON_ARRAYAGG(JSON_OBJECT(
                     'replyID',r.reply_id,
                     'username',ru.username,
                     'body',r.body,
@@ -127,6 +127,7 @@ const getPost = async (req,res) => {
             FROM post_comments c LEFT JOIN user_profile cu 
             ON c.user_id = cu.user_id
             WHERE c.post_id = p.post_id
+            ORDER BY c.comment_id DESC
             ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
             INNER JOIN forum_topics t ON p.topic_id = t.topic_id
             WHERE p.post_id = ?`,[id]);
@@ -142,7 +143,7 @@ const getPost = async (req,res) => {
             result:get_post[0]
         })
     } catch (error) {
-        //  console.error(error);
+         console.error(error);
          return res.status(500).json({
             status:'Error',
             message:'There was an error getting the post'
