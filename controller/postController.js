@@ -3,9 +3,9 @@ const pool = require('../config/database');
 
 //handles post creation function
 const createNewPost = async (req,res) => {
-    const{title, body, user_id, topic_id} = req.body;
+    const{title, body, user_id, topic_id, image} = req.body;
     try {
-        const [create_post] = await pool.query(`INSERT INTO user_posts (title,body,user_id,topic_id) VALUES (?, ?, ?, ?)`,[title,body,user_id,topic_id]);    
+        const [create_post] = await pool.query(`INSERT INTO user_posts (title,body,user_id,topic_id,image) VALUES (?, ?, ?, ?, ?)`,[title,body,user_id,topic_id, image]);    
         return res.status(201).json({
             status:'Success',
             message:'Post successfully created'
@@ -31,6 +31,7 @@ const getAllPost = async (req,res) => {
         p.title AS title,
         p.body AS content,
         p.created_at AS date_posted,
+        p.image,
         (
             SELECT COUNT(*) FROM post_comments c WHERE c.post_id = p.post_id
         ) AS commentCount,
@@ -97,6 +98,7 @@ const getPost = async (req,res) => {
         p.title AS title,
         p.body AS content,
         p.created_at AS date_posted,
+        p.image,
         (
             SELECT COUNT(*) FROM post_comments c WHERE c.post_id = p.post_id
         ) AS commentCount,
@@ -159,7 +161,8 @@ const getPostBy = async (req,res) => {
             p.title AS title,
             p.body AS content,
             p.created_at AS date_posted,
-            p.updated_at AS date_updated 
+            p.updated_at AS date_updated,
+            p.image
             FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id 
             WHERE p.user_id = ?`,[id]);
             
@@ -190,7 +193,8 @@ const getPostByTopic = async (req,res) => {
             p.title AS title,
             p.body AS content,
             p.created_at AS date_posted,
-            p.updated_at AS date_updated 
+            p.updated_at AS date_updated,
+            p.image
             FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id 
             WHERE p.topic_id = ?`)
         if(get_post_by_topic.length === 0) {
