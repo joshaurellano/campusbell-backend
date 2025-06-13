@@ -12,9 +12,9 @@ const userValidationRules = () => {
         body('email')
         .isEmail().withMessage('Email not valid')
         .custom(value =>{
-            const result = value.includes("gbox.ncf.edu.ph")
+            const result = value.includes("gbox.ncf.edu.ph") || value.includes("gmail.com")
             return result
-        }).withMessage("Only institutional NCF email is accepted \n"),
+        }).withMessage("Only institutional NCF email is accepted"),
         body('first_name')
         .matches(/^[A-Za-z.-\s]+$/).withMessage('First name only accepts letters and characters "," and "-"'),
         body('middle_name')
