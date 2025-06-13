@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const Mailgen = require('mailgen');
 const pool = require('../config/database');
 
-const sendMail = async (email,otp) => {
+const sendMail = async (email,otp,purpose_id) => {
 // const {email} = req.body;
 
 console.log(email, otp)
@@ -37,7 +37,7 @@ console.log(email, otp)
         // console.log(check_if_email_otp_exist[0].otp)
         const otpKey = otp;
         const firstName = check_if_email_otp_exist[0].firstName;
-        const purpose = check_if_email_otp_exist[0].purpose;
+        purpose = purpose_id;
         let config = {
             service : 'gmail',
             auth : {
@@ -64,7 +64,7 @@ console.log(email, otp)
         */
        
         let response = null;
-        if(purpose === 2) {
+        if(purpose === '2') {
             response = {
                 body: {
                     name : `${firstName}`,
@@ -74,9 +74,7 @@ console.log(email, otp)
                             {
                             message:`
                             Greetings from Campus Bell, <br/><br/>
-    
-                            We received an OTP request for ${purpose}.<br/><br/>
-                            
+                                
                             Here is your otp code ${otpKey}. Please note that it is valid for 10 minutes only.
                             
                             If you did not request for this change, please update your password and secure your account`,
@@ -87,7 +85,7 @@ console.log(email, otp)
                 }
             }
         }
-        else if(purpose === 3) {
+        else if(purpose === '3') {
             response = {
                 body: {
                     name : `${firstName}`,
@@ -99,8 +97,10 @@ console.log(email, otp)
                             Greetings, <br/><br/>
     
                             Welcome to Campus Bell, a forum made by student for all students.</br>
-                            Before proceeding, get your OTP here so you can start interacting with otehr students </br> 
+                            Before proceeding, get your OTP here so you can start interacting with other students </br> 
                             >>> ${otp}. </br></br>
+
+                            Login with your username and enter your email and the otp for you to be verified. </br></br>
 
                             Feel free to ask questions to the community. We are all here to help one another. </br> </br>
 
@@ -126,9 +126,7 @@ console.log(email, otp)
                             {
                             message:`
                             Greetings from Campus Bell, <br/><br/>
-    
-                            We received an OTP request for ${purpose}.<br/><br/>
-                            
+                                
                             Here is your otp code ${otpKey}. Please note that it is valid for 10 minutes only.
                             
                             If you did not request for this change, you can safely ignore this message.`,

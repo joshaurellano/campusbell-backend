@@ -23,7 +23,7 @@ const userValidationRules = () => {
         body('last_name')
         .matches(/^[A-Z a-z.-\s]+$/).withMessage('Last name only accepts letters and characters "," and "-"'),
         body('phone_number')
-        .matches(/^[0-9 - +]+$/).withMessage('Phone Number only accepts numbers and character "-"')
+        .matches(/^\+?[0-9\s\-]+$/).withMessage('Phone Number only accepts numbers characters as International format')
         .isLength({min:9,max:13}).withMessage('Phone number should be minimum of 9 characters and maximum of 13 characters')
     ]
 
