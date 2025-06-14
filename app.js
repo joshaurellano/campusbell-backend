@@ -14,6 +14,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const replyRoutes = require('./routes/replyRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const imgUploadRoutes = require('./routes/imgUploadRoutes');
+const reactsRoutes = require('./routes/reactsRoutes');
 
 const {clear_otp} = require('./controller/otpController');
 
@@ -48,6 +49,7 @@ app.use('/comment',commentRoutes);
 app.use('/reply',replyRoutes);
 app.use('/report',reportRoutes);
 app.use('/upload',imgUploadRoutes);
+app.use('/react',reactsRoutes);
 
 cron.schedule ('* * * * Sunday', async () =>{
     try{
