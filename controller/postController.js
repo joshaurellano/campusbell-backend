@@ -245,7 +245,7 @@ const getPostByTopic = async (req,res) => {
 				) AS ordered_comments
             ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
             INNER JOIN forum_topics t ON p.topic_id = t.topic_id 
-            WHERE p.topic_id = ?`,[id])
+            WHERE p.topic_id = ? ORDER BY p.created_at DESC`,[id])
         if(get_post_by_topic.length === 0) {
             return res.statustus(404).json({
                 status:'Error',
