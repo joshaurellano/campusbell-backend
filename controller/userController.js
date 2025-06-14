@@ -33,12 +33,36 @@ const getAllUsers = async (req, res) => {
 const getUser = async (req, res) => {
     const {id} = req.params;
     try {
-        const [get_user] = await pool.query(`SELECT 
-            username,first_name,middle_name,last_name,
-            email,phone_number,yr_level,program,
-            region,province,city,town,barangay,street,house_no, 
-            role_id 
-            FROM user_profile WHERE user_id = ?`,[id]);
+        const [get_user] = await pool.query(`
+           SELECT 
+            up.username,
+            up.profile_image,
+            up.first_name,
+            up.middle_name,
+            up.last_name,
+            up.email,
+            up.phone_number,
+            up.yr_level,
+            up.program,
+            up.region,
+            up.province,
+            up.city,
+            up.town,
+            up.barangay,
+            up.street,
+            up.house_no, 
+            up.role_id,
+            (
+				SELECT JSON_ARRAYAGG(JSON_OBJECT(
+					'postId',p.post_id,
+					'topicId',p.topic_id,
+					'post_title',p.title,
+					'post_content',p.body,
+					'post_posted',p.created_at,
+					'post_image',p.image)
+                    ) FROM user_posts p WHERE p.user_id = up.user_id
+			) AS 'posts'
+            FROM user_profile up WHERE up.user_id = ?`,[id]);
         if(get_user.length === 0){
             return res.status(404).json({
                 status:'Error',

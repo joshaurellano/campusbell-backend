@@ -104,32 +104,40 @@ const getPost = async (req,res) => {
         ) AS commentCount,
 
         (
-            SELECT JSON_ARRAYAGG(JSON_OBJECT(
-            'commentID',c.comment_id,
-            'replyCount',
-            (
-                SELECT COUNT(*) FROM comment_reply r WHERE r.comment_id = c.comment_id
-            ),
-            'commentID',c.comment_id,
-            'username',cu.username,
-            'body',c.body,
-            'date_posted',c.created_at,
-            'replies',
-                (
-                    SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                    'replyID',r.reply_id,
-                    'username',ru.username,
-                    'body',r.body,
-                    'date_posted',r.created_at)) 
-                    FROM comment_reply r LEFT JOIN user_profile ru
-                    ON ru.user_id = r.user_id
-                    WHERE r.comment_id = c.comment_id
-                )
-            ))
-            FROM post_comments c LEFT JOIN user_profile cu 
-            ON c.user_id = cu.user_id
-            WHERE c.post_id = p.post_id
-            ORDER BY c.comment_id DESC
+            SELECT JSON_ARRAYAGG(comment_data)
+				
+            FROM
+				(
+					SELECT JSON_OBJECT(
+						'commentID',c.comment_id,
+						'username',cu.username,
+						'body',c.body,
+						'date_posted',c.created_at,
+                        'replyCount',
+						(
+							SELECT COUNT(*) FROM comment_reply r WHERE r.comment_id = c.comment_id
+						),
+                        'replies', (
+							SELECT 
+								JSON_ARRAYAGG(reply_data)
+                                FROM (
+									SELECT JSON_OBJECT(
+										'replyID',r.reply_id,
+										'username',ru.username,
+										'body',r.body,
+										'date_posted',r.created_at
+                                    ) AS reply_data FROM comment_reply r LEFT JOIN user_profile ru
+									ON ru.user_id = r.user_id
+									WHERE r.comment_id = c.comment_id
+                                    ORDER BY r.created_at DESC
+                                ) AS ordered_replies
+                        )
+                    ) AS comment_data FROM post_comments c 
+                    LEFT JOIN user_profile cu 
+					ON c.user_id = cu.user_id
+					WHERE c.post_id = p.post_id
+                    ORDER BY c.created_at DESC
+				) AS ordered_comments
             ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
             INNER JOIN forum_topics t ON p.topic_id = t.topic_id
             WHERE p.post_id = ?`,[id]);
@@ -186,17 +194,58 @@ const getPostBy = async (req,res) => {
     }
 }
 const getPostByTopic = async (req,res) => {
-    const {id} = req.body;
+    const {id} = req.params;
     try {
         const [get_post_by_topic] = await pool.query(`SELECT 
-            u.username AS username,
-            p.title AS title,
-            p.body AS content,
-            p.created_at AS date_posted,
-            p.updated_at AS date_updated,
-            p.image
-            FROM user_profile u INNER JOIN user_posts p ON u.user_id = p.user_id 
-            WHERE p.topic_id = ?`)
+        p.post_id AS postID,
+        u.username AS username,
+        t.topic_name,
+        p.title AS title,
+        p.body AS content,
+        p.created_at AS date_posted,
+        p.image,
+        (
+            SELECT COUNT(*) FROM post_comments c WHERE c.post_id = p.post_id
+        ) AS commentCount,
+
+        (
+            SELECT JSON_ARRAYAGG(comment_data)
+				
+            FROM
+				(
+					SELECT JSON_OBJECT(
+						'commentID',c.comment_id,
+						'username',cu.username,
+						'body',c.body,
+						'date_posted',c.created_at,
+                        'replyCount',
+						(
+							SELECT COUNT(*) FROM comment_reply r WHERE r.comment_id = c.comment_id
+						),
+                        'replies', (
+							SELECT 
+								JSON_ARRAYAGG(reply_data)
+                                FROM (
+									SELECT JSON_OBJECT(
+										'replyID',r.reply_id,
+										'username',ru.username,
+										'body',r.body,
+										'date_posted',r.created_at
+                                    ) AS reply_data FROM comment_reply r LEFT JOIN user_profile ru
+									ON ru.user_id = r.user_id
+									WHERE r.comment_id = c.comment_id
+                                    ORDER BY r.created_at DESC
+                                ) AS ordered_replies
+                        )
+                    ) AS comment_data FROM post_comments c 
+                    LEFT JOIN user_profile cu 
+					ON c.user_id = cu.user_id
+					WHERE c.post_id = p.post_id
+                    ORDER BY c.created_at DESC
+				) AS ordered_comments
+            ) AS comments FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
+            INNER JOIN forum_topics t ON p.topic_id = t.topic_id 
+            WHERE p.topic_id = ?`,[id])
         if(get_post_by_topic.length === 0) {
             return res.statustus(404).json({
                 status:'Error',
