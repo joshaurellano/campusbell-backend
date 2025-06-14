@@ -53,15 +53,23 @@ const getUser = async (req, res) => {
             up.house_no, 
             up.role_id,
             (
-				SELECT JSON_ARRAYAGG(JSON_OBJECT(
-					'postId',p.post_id,
-					'topicId',p.topic_id,
-					'post_title',p.title,
-					'post_content',p.body,
-					'post_posted',p.created_at,
-					'post_image',p.image)
-                    ) FROM user_posts p WHERE p.user_id = up.user_id
-			) AS 'posts'
+				SELECT JSON_ARRAYAGG(post_data) 
+                FROM (
+					SELECT JSON_OBJECT(
+						'postId',p.post_id,
+						'topicId',p.topic_id,
+                        'topic_name',t.topic_name,
+						'post_title',p.title,
+						'post_content',p.body,
+						'post_posted',p.created_at,
+						'post_image',p.image
+                    ) AS post_data FROM user_posts p 
+                    INNER JOIN forum_topics t ON p.topic_id = t.topic_id 
+                    WHERE p.user_id = up.user_id 
+                    ORDER BY p.created_at DESC
+                    LIMIT 10
+                ) AS ordered_posts
+			) AS posts
             FROM user_profile up WHERE up.user_id = ?`,[id]);
         if(get_user.length === 0){
             return res.status(404).json({
