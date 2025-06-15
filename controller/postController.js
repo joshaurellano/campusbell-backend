@@ -1,5 +1,6 @@
 /* This controller handles all function related to posts from creating, fetching, updating and deletion*/
 const pool = require('../config/database');
+const {checkIfUserReacted} = require('./reactsController')
 
 //handles post creation function
 const createNewPost = async (req,res) => {
@@ -23,6 +24,7 @@ const createNewPost = async (req,res) => {
 
 /*For function holding all content(post + comments + reply), there is another controller holding that*/
 const getAllPost = async (req,res) => {
+    const{id} = req.params
     try {
         const[get_all_post] = await pool.query(`SELECT 
         p.post_id AS postID,
@@ -90,10 +92,19 @@ ORDER BY p.created_at DESC`
                 message:'No post available'
             })
         }
+        
+        const postsWithReaction = await Promise.all(get_all_post.map(async post => {
+        const hasReacted = await checkIfUserReacted(id, post.postID);
+        return {
+            ...post,
+            reacted: hasReacted
+        };
+    }));
+
         return res.status(200).json({
             status:'Success',
-            total_post:get_all_post.length,
-            result:get_all_post
+            total_post:postsWithReaction.length,
+            result:postsWithReaction
         })
     } catch (error) {
         console.error(error);
