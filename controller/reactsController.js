@@ -5,9 +5,12 @@ const addReact = async (req, res) => {
 
     try {
         //check first of user already reacted to post
-        const[check_react] = await pool.query (`SELECT react_id, react_user_id FROM post_react WHERE react_post_id = ? AND react_user_id = ?`,[post_id, user_id]);
+        
+        // const[check_react] = await pool.query (`SELECT react_id, react_user_id FROM post_react WHERE react_post_id = ? AND react_user_id = ?`,[post_id, user_id]);
 
-        if(check_react.length === 0){
+        const check_react = await checkIfUserReacted(user_id, post_id)
+        if (check_react === false)
+        {
         const[add_react] = await pool.query(`INSERT INTO post_react (react_post_id, react_user_id) VALUES (?,?)`,[post_id, user_id]);
         
         return res.status(201).json({
@@ -15,9 +18,9 @@ const addReact = async (req, res) => {
             message:'Post reacted successfully',
             reacted: true 
         })
-    } else {
-        const reactId = check_react[0].react_id;
-        const remove_react = await delReact(user_id, reactId);
+    } else if(check_react === true) {
+
+        const remove_react = await delReact(user_id, post_id);
         return res.status(200).json({
             status:'Success',
             message:'Successfully removed the reaction',
@@ -25,16 +28,16 @@ const addReact = async (req, res) => {
         })
     }
     } catch (error) {
-        //console.error(error)
+        console.error(error)
         return res.status(500).json({
             status:'Error',
             message:'There was an error reacting to the post'
         })
     }
 }
-const delReact = async (user_id, reactId) => {
+const delReact = async (user_id, postId) => {
     try {
-        const [delete_react] = await pool.query(`DELETE FROM post_react WHERE react_user_id = ? AND react_id = ?`,[user_id, reactId]);
+        const [delete_react] = await pool.query(`DELETE FROM post_react WHERE react_user_id = ? AND react_post_id = ?`,[user_id, postId]);
     } catch (error) {
         console.error(error);
     }
@@ -164,5 +167,18 @@ const viewAllUserReact = async (req, res) => {
         })
     }
 }
+const checkIfUserReacted = async (user_id, post_id) => {
+    try {
+        const[check_if_reacted] = await pool.query(`SELECT react_user_id FROM post_react WHERE react_post_id = ? AND react_user_id = ?`,[post_id, user_id])
+        if(check_if_reacted.length === 0) {
+            return false
+        }else {
+            return true
+        }
 
-module.exports = {addReact,viewPostReact,viewUserReact,viewAllPostReact,viewAllUserReact}
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+module.exports = {addReact,viewPostReact,viewUserReact,viewAllPostReact,viewAllUserReact,checkIfUserReacted}
