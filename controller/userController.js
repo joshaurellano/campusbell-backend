@@ -113,6 +113,24 @@ const updateUser = async (req, res) => {
                 })
             } 
 }
+const updateProfileImage = async (req, res) => {
+    const {img_link, user_id} = req.body;
+
+    try {
+        const[update_pfp] = await pool.query(`UPDATE user_profile SET profile_image = ? WHERE user_id = ?`,[img_link, user_id])
+        return res.status(200).json({
+            status:'Success',
+            message:'Successfully updated the profile image'
+        })
+    } catch (error) {
+        //console.error(error)
+        return res.status(500).json({
+            status:'Error',
+            message:'There was a problem updating the profile image'
+        })
+        
+    }
+}
 const updateUserPassword = async (req, res) => {
     const {id} = req.params;
     const {password} = req.body;
@@ -168,4 +186,4 @@ const deleteUser = async (req, res) => {
     }
 
 }
-module.exports = {getAllUsers,getUser,updateUser,updateUserPassword,deleteUser};
+module.exports = {getAllUsers,getUser,updateUser,updateProfileImage,updateUserPassword,deleteUser};
