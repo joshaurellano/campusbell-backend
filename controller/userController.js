@@ -8,7 +8,7 @@ const getAllUsers = async (req, res) => {
         const [get_all_users] = await pool.query(`SELECT user_id,username,first_name,middle_name,last_name,
             email,phone_number,yr_level,program,
             region,province,city,town,barangay,street,house_no, 
-            role_id FROM user_profile`);
+            role_id FROM user_profile WHERE role_id != 4`);
         if(get_all_users.length === 0){
             return res.status(404).json({
                 status:'Error',

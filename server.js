@@ -34,6 +34,12 @@ wss.on('connection', (ws,req) => {
                 case('send_message'):
                 await saveChat(receiver_id, sender_id, message)
                 ws.send(JSON.stringify({ status: 'ok' }));
+
+                wss.clients.forEach((client) => {
+                client.send('Broadcast message!');
+                client.send(JSON.stringify({sender_id, receiver_id, message}))
+                });
+
                 break;
 
                 default:
@@ -42,9 +48,8 @@ wss.on('connection', (ws,req) => {
         } catch (error){
             throw (error)
         }
-        wss.clients.forEach((client) => {
-            client.send('Broadcast message!');
-          });
+        
+      
         
             ws.on('error', (err) => {
                 console.log('Error: ',err);
