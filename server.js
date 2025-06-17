@@ -48,9 +48,6 @@ wss.on('connection', (ws,req) => {
         } catch (error){
             throw (error)
         }
-        
-      
-        
             ws.on('error', (err) => {
                 console.log('Error: ',err);
             })

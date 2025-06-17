@@ -1,4 +1,5 @@
 const pool = require ('../config/database');
+const{addNotification} = require('./notificationController');
 
 const addReact = async (req, res) => {
     const {user_id,post_id} = req.body;
@@ -6,13 +7,21 @@ const addReact = async (req, res) => {
     try {
         //check first of user already reacted to post
         
-        // const[check_react] = await pool.query (`SELECT react_id, react_user_id FROM post_react WHERE react_post_id = ? AND react_user_id = ?`,[post_id, user_id]);
-
         const check_react = await checkIfUserReacted(user_id, post_id)
         if (check_react === false)
         {
-        const[add_react] = await pool.query(`INSERT INTO post_react (react_post_id, react_user_id) VALUES (?,?)`,[post_id, user_id]);
-        
+        const[add_react,post_owner_result] = await Promise.all([
+            pool.query(`INSERT INTO post_react (react_post_id, react_user_id) VALUES (?,?)`,[post_id, user_id]),
+            pool.query(`SELECT user_id FROM user_posts WHERE post_id = ?`,[post_id])
+        ]);
+
+        const post_owner = post_owner_result[0]; 
+        const notification_type = 1;
+        const notifier_id = user_id;
+        const notified_id = post_owner[0].user_id;
+
+        const add_alert = await addNotification(notification_type,notified_id,notifier_id,post_id);
+
         return res.status(201).json({
             status:'Success',
             message:'Post reacted successfully',
