@@ -83,7 +83,7 @@ const getAlert = async (req,res) => {
 
         return res.status(200).json({
             status:'Success',
-            result:get_alert[0]
+            result:get_alert
         })
     } catch (error) {
          console.error(error);
