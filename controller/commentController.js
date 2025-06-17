@@ -1,23 +1,26 @@
 const pool = require ('../config/database');
+const{addNotification} = require('./notificationController');
 
 const createComment = async (req,res) => {
     const {user_id,post_id,body} = req.body;
     try {
-        const [create_comment] = await pool.query
-        (`INSERT INTO post_comments (user_id, post_id, body)
-        VALUES (?,?,?)`,[user_id, post_id,body]);
-        if(create_comment.affectedRows === 0){
-            return res.status(400).json({
-                status:'Error',
-                message:'Please try again'
-            })
-        }
+        const[create_comment,post_owner_result] = await Promise.all([
+            pool.query(`INSERT INTO post_comments (user_id, post_id, body) VALUES (?,?,?)`,[user_id, post_id,body]),
+            pool.query(`SELECT user_id FROM user_posts WHERE post_id = ?`,[post_id])
+        ])
+        const post_owner = post_owner_result[0]; 
+        const notification_type = 2;
+        const notifier_id = user_id;
+        const notified_id = post_owner[0].user_id;
+
+        const add_alert = await addNotification(notification_type,notified_id,notifier_id,post_id);
+        
         return res.status(201).json({
             status:'Success',
             message:'Comment created succesfully'
         })
     } catch (error) {
-        // console.error(error)
+        console.error(error)
         return res.status(500).json({
             status:'Error',
             message:'There was an error inserting comment'
