@@ -61,25 +61,13 @@ const getAllAlerts = async (req,res) => {
 const getAlert = async (req,res) => {
     const{id} = req.params;
     try {
-        const[get_alert] = await pool.query(`SELECT p.post_id, p.title, (
-			SELECT JSON_ARRAYAGG(reactData) FROM 
-				(
-					SELECT JSON_OBJECT('reactorID',r_an.notifier_userid,
-                    'reactorusername', ru.username,
-                    'reactTime', r_an.created_at) AS reactData FROM alert_notification r_an JOIN user_profile ru ON r_an.notifier_userid = ru.user_id WHERE r_an.post_id = p.post_id AND r_an.notification_type = 1
-				) AS postReactNotif
-		) AS reactAlert, (
-			SELECT JSON_ARRAYAGG(commentData) FROM 
-				(
-					SELECT JSON_OBJECT('commenterID',c_an.notifier_userid,
-                    'commenterusername',cu.username,
-                    'commentTime',c_an.created_at) AS commentData FROM alert_notification c_an JOIN user_profile cu ON c_an.notifier_userid = cu.user_id WHERE c_an.post_id = p.post_id AND c_an.notification_type = 2
-                ) AS postCommentData
-		) AS commentAlert  FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id WHERE p.user_id = ? 
-        AND (
-			EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 1) OR 
-				EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 2)
-			)`,[id]);
+        const[get_alert] = await pool.query(`SELECT an.notification_id, p.post_id, p.title, nt.description, u.username AS 'notifier', un.username AS 'notified',an.created_at FROM alert_notification an 
+            INNER JOIN user_posts p ON an.post_id = p.post_id
+            JOIN notification_type nt ON nt.type_id = an.notification_type
+            JOIN user_profile u ON u.user_id = an.notifier_userid
+            JOIN user_profile un ON un.user_id = an.notified_userid
+            WHERE an.notified_userid = ?
+            ORDER BY an.created_at DESC`,[id]);
 
         return res.status(200).json({
             status:'Success',
