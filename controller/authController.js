@@ -71,6 +71,7 @@ const register = async (req,res) => {
 }  
 const login = async (req,res) => {
     const {username, password} = req.body;
+    const clientType = req.headers['x-client-type'];
     try {
         const[usernameResult] = await pool.query(`SELECT username, password,user_id,role_id FROM user_profile WHERE username = ?`, [username]);
         if(usernameResult.length === 0 ){
@@ -94,6 +95,7 @@ const login = async (req,res) => {
                 message:'Unverified'
             })
         }
+
         const token = jwt.sign({
             user_id: user.user_id,
             username: user.username,
@@ -109,6 +111,12 @@ const login = async (req,res) => {
             sameSite:'None',
             maxAge: 3600000
         });
+        if(clientType === 'mobile'){
+        
+        return res.status(200).json({
+            message:'Login successful',
+            token: token});
+        }
 
         return res.status(200).json({
             status:'Success',
@@ -136,6 +144,7 @@ const logout = async (req,res) => {
             message:'Logout successful'
         })
     } catch (error) {
+        console.error(error);
         return res.status(500).json({
             stattus:'Error',
             message:'There was an error logging out'

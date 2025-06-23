@@ -29,6 +29,7 @@ const corsOptions = {
 	  }
 	},
 	credentials: true, // Allow credentials
+  allowedHeaders : ['Content-Type', 'X-Client-Type']
   };
 app = express();
 
