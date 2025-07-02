@@ -1,43 +1,7 @@
 const pool = require('../config/database');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-
-function encrypt(text, key) {
-  // Generate a random initialization vector
-  const iv = crypto.randomBytes(16);
-
-  // Create cipher with AES-256-CBC
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-
-  // Encrypt the data
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-
-  // Return both the encrypted data and the IV
-  return {
-    iv: iv.toString('hex'),
-    encryptedData: encrypted
-  };
-}
-function decrypt(encryptedData, iv, key) {
-
-  // Create decipher
-  const decipher = crypto.createDecipheriv(
-    'aes-256-cbc',
-    key,
-    Buffer.from(iv, 'hex')
-  );
-
-  // Decrypt the data
-  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-
-  return decrypted;
-}
-
-// const key = crypto.scryptSync('secretPassword', 'salt', 32)
-const key = crypto.scryptSync(process.env.ENCRYPT_PASSWORD, process.env.ENCRYPT_SALT, 32)
+const {encrypt, decrypt, hashing} = require('../middleware/encryption')
 
 /*Add input validation using express validation. Add the function on middleware folder*/
 
@@ -58,26 +22,27 @@ const register = async (req,res) => {
         const data = Object.values(req.body)
         const field = Object.keys(req.body)
         
+
         const encryptedDetails = {};
          for (let i = 0; i<field.length; i++){
-            const result = encrypt(data[i], key)
+            const result = encrypt(data[i])
 
             encryptedDetails[field[i]] = JSON.stringify(result)
             
             // const decryption = decrypt(result.encryptedData,result.iv,key)
             // console.log('Decrypted Data: ', decryption) 
          }        
-
-        // const decryptUsername = decrypt(encryptedUsername.encryptedData, encryptedUsername.iv, key)
-        // console.log('Decrypted Data:', decryptUsername)
         
+        const hashed = hashing(req.body.email, req.body.phone_number)
+
         const [rows] = await pool.query(`INSERT INTO user_profile (
             username,password,
             first_name,middle_name,last_name,
-            email,phone_number,
+            email,hashed_email,phone_number,hashed_phoneNumber,
             region,province,city,town,barangay,street,house_no) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[encryptedDetails.username,hashedPass,encryptedDetails.first_name,encryptedDetails.middle_name,encryptedDetails.last_name,encryptedDetails.email,encryptedDetails.phone_number,encryptedDetails.yr_lvl,encryptedDetails.program,encryptedDetails.region,encryptedDetails.province,encryptedDetails.city,encryptedDetails.town,encryptedDetails.barangay,encryptedDetails.street,encryptedDetails.house_no]
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[username,hashedPass,encryptedDetails.first_name,encryptedDetails.middle_name,encryptedDetails.last_name,encryptedDetails.email,hashed.emailHash,encryptedDetails.phone_number,hashed.phoneNumberHash,encryptedDetails.yr_lvl,encryptedDetails.program,encryptedDetails.region,encryptedDetails.province,encryptedDetails.city,encryptedDetails.town,encryptedDetails.barangay,encryptedDetails.street,encryptedDetails.house_no]
         );
+
         //Printing of user details for successful registration
         return res.status(201).json({
             status:'Success',
@@ -96,17 +61,23 @@ const register = async (req,res) => {
         //Duplicate entry error handling
         /*Improve function by adding the specific duplicate field */
         if(err.code === 'ER_DUP_ENTRY'){
-            console.error(err.message)
+            // console.error(err.message)
             if(err.message.includes('email')){
             return res.status(409).json({
                 status:'Error',
                 message:'Email already in used'
                 });
             }
-            else if(err.message.includes('phone_number')){
+            else if(err.message.includes('phoneNumber' || 'phone_number')){
             return res.status(409).json({
                 status:'Error',
                 message:'Phone Number already in used'
+                });
+            }
+            else if(err.message.includes('username')){
+            return res.status(409).json({
+                status:'Error',
+                message:'Username already in used'
                 });
             }
         }
