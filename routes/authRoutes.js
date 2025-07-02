@@ -4,8 +4,7 @@ const{userValidationRules,validate} = require('../middleware/validator')
 const authenticateToken = require('../middleware/authMiddleware')
 
 const router = express.Router();
-// router.post('/register',userValidationRules(),validate,register); 
-router.post('/register',register); 
+router.post('/register',userValidationRules(),validate,register); 
 router.post('/login',login);
 router.get('/',authenticateToken,userTokenInfo);
 router.post('/logout',logout);

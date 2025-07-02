@@ -47,52 +47,42 @@ const register = async (req,res) => {
     
     const saltRounds = 10; 
 /*The fields here are the fields that have NOT NULL constraints on database*/
-    // if(!username||!password||!email||!phone_number||!first_name||!last_name){
-    //     return res.status(400).json({
-    //         status:'Error',
-    //         message:'Necessary fields missing'   
-    //     });
-    //  }
+    if(!username||!password||!email||!phone_number||!first_name||!last_name){
+        return res.status(400).json({
+            status:'Error',
+            message:'Necessary fields missing'   
+        });
+     }
     try{
-        // const hashedPass = await bcrypt.hash(password, saltRounds);
+        const hashedPass = await bcrypt.hash(password, saltRounds);
         const data = Object.values(req.body)
         const field = Object.keys(req.body)
         
         const encryptedDetails = {};
          for (let i = 0; i<field.length; i++){
             const result = encrypt(data[i], key)
-            console.log('Original Message:',data[i])
-            console.log(result)
 
-            encryptedDetails[field[i]] = result
-
-            const decryption = decrypt(result.encryptedData,result.iv,key)
-            console.log('Decrypted Data: ', decryption) 
-         }
-        //  console.log(JSON.stringify(encryptedDetails))
-         
-
-        // const encryptedUsername = encrypt(req.body.username, key)
-        // console.log('Original Message:',req.body.username)
-        // console.log(encryptedUsername)
+            encryptedDetails[field[i]] = JSON.stringify(result)
+            
+            // const decryption = decrypt(result.encryptedData,result.iv,key)
+            // console.log('Decrypted Data: ', decryption) 
+         }        
 
         // const decryptUsername = decrypt(encryptedUsername.encryptedData, encryptedUsername.iv, key)
         // console.log('Decrypted Data:', decryptUsername)
-
-        //password hashing 
         
-        // const [rows] = await pool.query(`INSERT INTO user_profile (
-        //     username,password,
-        //     first_name,middle_name,last_name,
-        //     email,phone_number,
-        //     region,province,city,town,barangay,street,house_no) 
-        //     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[username,hashedPass,first_name,middle_name,last_name,email,phone_number,yr_lvl,program,region,province,city,town,barangay,street,house_no]
-        // );
+        const [rows] = await pool.query(`INSERT INTO user_profile (
+            username,password,
+            first_name,middle_name,last_name,
+            email,phone_number,
+            region,province,city,town,barangay,street,house_no) 
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[encryptedDetails.username,hashedPass,encryptedDetails.first_name,encryptedDetails.middle_name,encryptedDetails.last_name,encryptedDetails.email,encryptedDetails.phone_number,encryptedDetails.yr_lvl,encryptedDetails.program,encryptedDetails.region,encryptedDetails.province,encryptedDetails.city,encryptedDetails.town,encryptedDetails.barangay,encryptedDetails.street,encryptedDetails.house_no]
+        );
         //Printing of user details for successful registration
         return res.status(201).json({
             status:'Success',
             message:'User registered successfully!',
-            // id_number: rows.insertId,
+            id_number: rows.insertId,
             username,
             first_name,
             middle_name,
