@@ -7,7 +7,7 @@ const {encrypt, decrypt, hashing} = require('../middleware/encryption')
 
 //User registration
 const register = async (req,res) => {
-    const {username,password,first_name,middle_name,last_name,email,phone_number,yr_lvl,program,region,province,city,town,barangay,street,house_no, role_id} = req.body;
+    const {username,password,first_name,middle_name,last_name,email,phone_number,yr_level,program,region,province,city,town,barangay,street,house_no, role_id} = req.body;
     
     const saltRounds = 10; 
 /*The fields here are the fields that have NOT NULL constraints on database*/
@@ -33,11 +33,43 @@ const register = async (req,res) => {
         const hashed = hashing(req.body.email, req.body.phone_number)
 
         const [rows] = await pool.query(`INSERT INTO user_profile (
-            username,password,
-            first_name,middle_name,last_name,
-            email,hashed_email,phone_number,hashed_phoneNumber,
-            region,province,city,town,barangay,street,house_no) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[username,hashedPass,encryptedDetails.first_name,encryptedDetails.middle_name,encryptedDetails.last_name,encryptedDetails.email,hashed.emailHash,encryptedDetails.phone_number,hashed.phoneNumberHash,encryptedDetails.yr_lvl,encryptedDetails.program,encryptedDetails.region,encryptedDetails.province,encryptedDetails.city,encryptedDetails.town,encryptedDetails.barangay,encryptedDetails.street,encryptedDetails.house_no]
+            username,
+            password,
+            first_name,
+            middle_name,
+            last_name,
+            email,
+            hashed_email,
+            phone_number,
+            hashed_phoneNumber,
+            yr_level,
+            program,
+            region,
+            province,
+            city,
+            town,
+            barangay,
+            street,
+            house_no) 
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            [   username,
+                hashedPass,
+                encryptedDetails.first_name,
+                encryptedDetails.middle_name,
+                encryptedDetails.last_name,
+                encryptedDetails.email,
+                hashed.emailHash,
+                encryptedDetails.phone_number,
+                hashed.phoneNumberHash,
+                encryptedDetails.yr_level,
+                encryptedDetails.program,
+                encryptedDetails.region,
+                encryptedDetails.province,
+                encryptedDetails.city,
+                encryptedDetails.town,
+                encryptedDetails.barangay,
+                encryptedDetails.street,
+                encryptedDetails.house_no]
         );
 
         //Printing of user details for successful registration

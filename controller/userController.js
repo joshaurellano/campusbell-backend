@@ -112,7 +112,6 @@ const getUser = async (req, res) => {
             const userAttribute = Object.keys(get_user[0])
             const userInfo = Object.values(get_user[0])
             
-            const newData = []
             const encryptedUser = {}
             const decryptedUser = {}
             for(let i=0; i<userAttribute.length; i++) {
@@ -126,12 +125,13 @@ const getUser = async (req, res) => {
                 } else {
                     encryptedUser[userAttribute[i]] = null
                 }
-                
+                // console.log(userAttribute[i],encryptedUser[userAttribute[i]])
             
             decryptedUser[userAttribute[i]] = encryptedUser[userAttribute[i]] 
                 if(decryptedUser[userAttribute[i]] !== null && typeof(decryptedUser[userAttribute[i]]) ==='object'){
                     const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
                     decryptedUser[userAttribute[i]] = decryption
+                    // console.log(userAttribute[i], decryption)
                 }
                 // console.log(decryptedUser)
                 get_user[0] = decryptedUser;
@@ -164,7 +164,7 @@ const updateUser = async (req, res) => {
             encryption = encrypt(userValue[i])
             encrypting[userAttribute[i]] = JSON.stringify(encryption)
             }
-            console.log(userAttribute[i], encrypting)
+            // console.log(userAttribute[i], encrypting)
         }
         
         const hashed = hashing(req.body.email, req.body.phone_number)

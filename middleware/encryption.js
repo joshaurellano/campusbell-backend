@@ -37,8 +37,6 @@ function decrypt(encryptedData, iv) {
   return decrypted;
 }
 function hashing(email, phone_number) {
-    console.log('email',email)
-    console.log('phone_number',phone_number)
 
     const emailHash = crypto.createHash('sha256') 
         .update(email)
