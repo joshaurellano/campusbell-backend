@@ -38,7 +38,7 @@ const getAllUsers = async (req, res) => {
                 }
                     decryptedUser[userAttribute[i]] = encryptedUser[userAttribute[i]] 
                 if(decryptedUser[userAttribute[i]] !== null && typeof(decryptedUser[userAttribute[i]]) === 'object' ){
-                    const decryption = decrypt(encryptedUser[userAttribute[i]].encryptedData,encryptedUser[userAttribute[i]].iv)
+                    const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
                     // console.log('Decrypted Data: ',userAttribute[i], decryption)
                         decryptedUser[userAttribute[i]] = decryption
                         // encryptedUser[userAttribute[i]] = decryption
@@ -109,12 +109,37 @@ const getUser = async (req, res) => {
                 message:'User Not Available'
             })
         }
-        else{
+            const userAttribute = Object.keys(get_user[0])
+            const userInfo = Object.values(get_user[0])
+            
+            const newData = []
+            const encryptedUser = {}
+            const decryptedUser = {}
+            for(let i=0; i<userAttribute.length; i++) {
+                
+                if(userInfo !== null){
+                    try{
+                        encryptedUser[userAttribute[i]] = JSON.parse(userInfo[i])
+                    } catch (error){
+                        encryptedUser[userAttribute[i]] = userInfo[i]
+                    }
+                } else {
+                    encryptedUser[userAttribute[i]] = null
+                }
+                
+            
+            decryptedUser[userAttribute[i]] = encryptedUser[userAttribute[i]] 
+                if(decryptedUser[userAttribute[i]] !== null && typeof(decryptedUser[userAttribute[i]]) ==='object'){
+                    const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
+                    decryptedUser[userAttribute[i]] = decryption
+                }
+                // console.log(decryptedUser)
+                get_user[0] = decryptedUser;
+            }
             return res.status(200).json({
                 status:'Success',
-                result:get_user[0]
+                result:get_user
             });
-        }
     } catch (error) {
         console.error(error);
         return res.status(500).json({
