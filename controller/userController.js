@@ -1,7 +1,7 @@
 /* This Controller handle all user based functions */
-
 const pool = require('../config/database');
 const bcrypt = require('bcryptjs');
+const {encrypt, decrypt, hashing} = require('../middleware/encryption')
 
 const getAllUsers = async (req, res) => {
     try {
@@ -9,19 +9,51 @@ const getAllUsers = async (req, res) => {
             email,phone_number,yr_level,program,
             region,province,city,town,barangay,street,house_no, 
             role_id FROM user_profile WHERE role_id != 4`);
+        
         if(get_all_users.length === 0){
             return res.status(404).json({
                 status:'Error',
                 message:'No Users Available'
             })
         }
-        else{
-            return res.status(200).json({
-                status:'Success',
-                totalUSers:get_all_users.length,
-                result:get_all_users
-            });
+        const allUsers = []
+        
+        for( let n=0; n<get_all_users.length; n++){
+            
+            const encryptedUser = {}
+            const decryptedUser = {}
+            const userAttribute = Object.keys(get_all_users[n])
+            const userInfo = Object.values(get_all_users[n])
+            
+            for(let i=0; i<userAttribute.length; i++){
+                
+                if(userInfo[i] !== null){
+                    try{
+                        encryptedUser[userAttribute[i]] = JSON.parse(userInfo[i])
+                    } catch(error) {
+                        encryptedUser[userAttribute[i]] = userInfo[i]
+                    }
+                } else {
+                    encryptedUser[userAttribute[i]] = null
+                }
+                    decryptedUser[userAttribute[i]] = encryptedUser[userAttribute[i]] 
+                if(decryptedUser[userAttribute[i]] !== null && typeof(decryptedUser[userAttribute[i]]) === 'object' ){
+                    const decryption = decrypt(encryptedUser[userAttribute[i]].encryptedData,encryptedUser[userAttribute[i]].iv)
+                    // console.log('Decrypted Data: ',userAttribute[i], decryption)
+                        decryptedUser[userAttribute[i]] = decryption
+                        // encryptedUser[userAttribute[i]] = decryption
+                }         
+            }
+           
+            //  console.log(n,decryptedUser)
+             allUsers[n] = decryptedUser
         }
+
+        return res.status(200).json(
+            // status:'Success',
+            // totalUSers:get_all_users.length,
+           allUsers);
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({

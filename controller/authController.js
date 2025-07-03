@@ -28,9 +28,6 @@ const register = async (req,res) => {
             const result = encrypt(data[i])
 
             encryptedDetails[field[i]] = JSON.stringify(result)
-            
-            // const decryption = decrypt(result.encryptedData,result.iv,key)
-            // console.log('Decrypted Data: ', decryption) 
          }        
         
         const hashed = hashing(req.body.email, req.body.phone_number)
