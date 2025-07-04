@@ -24,7 +24,7 @@ const createNewPost = async (req,res) => {
 
 /*For function holding all content(post + comments + reply), there is another controller holding that*/
 const getAllPost = async (req,res) => {
-    const{id} = req.params
+    const{user_id} = req.params
     try {
         const[get_all_post] = await pool.query(`SELECT 
         p.post_id AS postID,
@@ -94,7 +94,7 @@ ORDER BY p.created_at DESC`
         }
         
         const postsWithReaction = await Promise.all(get_all_post.map(async post => {
-        const hasReacted = await checkIfUserReacted(id, post.postID);
+        const hasReacted = await checkIfUserReacted(user_id, post.postID);
         return {
             ...post,
             reacted: hasReacted
@@ -118,6 +118,7 @@ ORDER BY p.created_at DESC`
 //Get particular post
 const getPost = async (req,res) => {
     const{id} = req.params;
+    const{user_id} = req.params
     try {
         const[get_post] = await pool.query(`SELECT 
         p.post_id AS postID,
@@ -176,9 +177,17 @@ const getPost = async (req,res) => {
                 message:'Post not available'
             })
         }
+        const postsWithReaction = await Promise.all(get_post.map(async post => {
+        const hasReacted = await checkIfUserReacted(user_id, post.postID);
+        return {
+            ...post,
+            reacted: hasReacted
+        };
+    }));
+
         return res.status(200).json({
             status:'Success',
-            result:get_post[0]
+            result:postsWithReaction
         })
     } catch (error) {
          console.error(error);
