@@ -38,10 +38,10 @@ const getAllUsers = async (req, res) => {
                 }
                     decryptedUser[userAttribute[i]] = encryptedUser[userAttribute[i]] 
                 if(decryptedUser[userAttribute[i]] !== null && typeof(decryptedUser[userAttribute[i]]) === 'object' ){
-                    const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
-                    // console.log('Decrypted Data: ',userAttribute[i], decryption)
+                    if(decryptedUser[userAttribute[i]].encryptedData && decryptedUser[userAttribute[i]].iv){
+                        const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
                         decryptedUser[userAttribute[i]] = decryption
-                        // encryptedUser[userAttribute[i]] = decryption
+                    }
                 }         
             }
            
@@ -129,11 +129,11 @@ const getUser = async (req, res) => {
             
             decryptedUser[userAttribute[i]] = encryptedUser[userAttribute[i]] 
                 if(decryptedUser[userAttribute[i]] !== null && typeof(decryptedUser[userAttribute[i]]) ==='object'){
-                    const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
-                    decryptedUser[userAttribute[i]] = decryption
-                    // console.log(userAttribute[i], decryption)
+                    if(decryptedUser[userAttribute[i]].encryptedData && decryptedUser[userAttribute[i]].iv){
+                        const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
+                        decryptedUser[userAttribute[i]] = decryption
+                    }
                 }
-                // console.log(decryptedUser)
                 get_user[0] = decryptedUser;
             }
             return res.status(200).json({
