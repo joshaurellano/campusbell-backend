@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 
-// const key = crypto.scryptSync('secretPassword', 'salt', 32)
 const key = crypto.scryptSync(process.env.ENCRYPT_PASSWORD, process.env.ENCRYPT_SALT, 32)
 
 function encrypt(text) {

@@ -16,43 +16,8 @@ const getAllUsers = async (req, res) => {
                 message:'No Users Available'
             })
         }
-        const allUsers = []
-        
-        for( let n=0; n<get_all_users.length; n++){
-            
-            const encryptedUser = {}
-            const decryptedUser = {}
-            const userAttribute = Object.keys(get_all_users[n])
-            const userInfo = Object.values(get_all_users[n])
-            
-            for(let i=0; i<userAttribute.length; i++){
-                
-                if(userInfo[i] !== null){
-                    try{
-                        encryptedUser[userAttribute[i]] = JSON.parse(userInfo[i])
-                    } catch(error) {
-                        encryptedUser[userAttribute[i]] = userInfo[i]
-                    }
-                } else {
-                    encryptedUser[userAttribute[i]] = null
-                }
-                    decryptedUser[userAttribute[i]] = encryptedUser[userAttribute[i]] 
-                if(decryptedUser[userAttribute[i]] !== null && typeof(decryptedUser[userAttribute[i]]) === 'object' ){
-                    if(decryptedUser[userAttribute[i]].encryptedData && decryptedUser[userAttribute[i]].iv){
-                        const decryption = decrypt(decryptedUser[userAttribute[i]].encryptedData, decryptedUser[userAttribute[i]].iv)
-                        decryptedUser[userAttribute[i]] = decryption
-                    }
-                }         
-            }
-           
-            //  console.log(n,decryptedUser)
-             allUsers[n] = decryptedUser
-        }
 
-        return res.status(200).json(
-            // status:'Success',
-            // totalUSers:get_all_users.length,
-           allUsers);
+        return res.status(200).json({result:get_all_users});
 
     } catch (error) {
         console.error(error);
@@ -64,6 +29,7 @@ const getAllUsers = async (req, res) => {
 }
 const getUser = async (req, res) => {
     const {id} = req.params;
+
     try {
         const [get_user] = await pool.query(`
            SELECT 
