@@ -24,7 +24,7 @@ const createNewPost = async (req,res) => {
 
 /*For function holding all content(post + comments + reply), there is another controller holding that*/
 const getAllPost = async (req,res) => {
-    const{user_id} = req.params
+    const userID = req.userId
     try {
         const[get_all_post] = await pool.query(`SELECT 
         p.post_id AS postID,
@@ -94,7 +94,7 @@ ORDER BY p.created_at DESC`
         }
         
         const postsWithReaction = await Promise.all(get_all_post.map(async post => {
-        const hasReacted = await checkIfUserReacted(user_id, post.postID);
+        const hasReacted = await checkIfUserReacted(userID, post.postID);
         return {
             ...post,
             reacted: hasReacted
@@ -118,7 +118,7 @@ ORDER BY p.created_at DESC`
 //Get particular post
 const getPost = async (req,res) => {
     const{id} = req.params;
-    const{user_id} = req.params
+    const userID = req.userId;
     try {
         const[get_post] = await pool.query(`SELECT 
         p.post_id AS postID,
@@ -178,7 +178,7 @@ const getPost = async (req,res) => {
             })
         }
         const postsWithReaction = await Promise.all(get_post.map(async post => {
-        const hasReacted = await checkIfUserReacted(user_id, post.postID);
+        const hasReacted = await checkIfUserReacted(userID, post.postID);
         return {
             ...post,
             reacted: hasReacted
@@ -284,7 +284,7 @@ const getPostByTopic = async (req,res) => {
             INNER JOIN forum_topics t ON p.topic_id = t.topic_id 
             WHERE p.topic_id = ? ORDER BY p.created_at DESC`,[id])
         if(get_post_by_topic.length === 0) {
-            return res.statustus(404).json({
+            return res.status(404).json({
                 status:'Error',
                 message:'No Post available'
             })
@@ -307,7 +307,8 @@ const updatePost = async (req,res) => {
     const {id} = req.params;
     const {title, body} = req.body;
     try {
-        if(id !== req.userId){
+        const [userID] = await pool.query(`SELECT user_id FROM user_posts WHERE post_id = ?`,[id])
+        if(userID[0].user_id !== req.userId){
             return res.status(403).json({
                 status:'Error',
                 message:'You do not have permission to make changes on this post. Post belongs to another user'
@@ -336,7 +337,8 @@ const updatePost = async (req,res) => {
 const deletePost = async (req,res) => {
     const {id} = req.params;
     try {
-        if(id !== req.userId){
+        const [userID] = await pool.query(`SELECT user_id FROM user_posts WHERE post_id = ?`,[id])
+        if(userID[0].user_id !== req.userId){
             return res.status(403).json({
                 status:'Error',
                 message:'You do not have permission to remove this post. Post belongs to another user'
