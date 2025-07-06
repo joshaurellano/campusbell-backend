@@ -31,6 +31,12 @@ const getUser = async (req, res) => {
     const {id} = req.params;
 
     try {
+        if(id !== req.userId){
+            return res.status(403).json({
+                status:'Error',
+                message:'You dont have permission to view this account'
+            })
+        }
         const [get_user] = await pool.query(`
            SELECT 
             up.username,
@@ -118,6 +124,12 @@ const updateUser = async (req, res) => {
     const {id} = req.params;
     const {username,first_name,middle_name,last_name,email,phone_number,yr_level,program,region,province,city,town,barangay,street,house_no} = req.body;
 
+     if(id !== req.userId){
+            return res.status(403).json({
+                status:'Error',
+                message:'You dont have permission to make changes on this account'
+            })
+        }
         userAttribute = Object.keys(req.body)
         userValue = Object.values(req.body)
 
@@ -157,6 +169,12 @@ const updateUser = async (req, res) => {
 }
 const updateProfileImage = async (req, res) => {
     const {img_link, user_id} = req.body;
+     if(user_id !== req.userId){
+            return res.status(403).json({
+                status:'Error',
+                message:'You dont have permission to make changes on this account'
+            })
+        }
 
     try {
         const[update_pfp] = await pool.query(`UPDATE user_profile SET profile_image = ? WHERE user_id = ?`,[img_link, user_id])
@@ -177,12 +195,20 @@ const updateUserPassword = async (req, res) => {
     const {id} = req.params;
     const {password} = req.body;
     const saltRounds = 10;
+    
+    if(id !== req.userId){
+            return res.status(403).json({
+                status:'Error',
+                message:'You dont have permission to make changes on this account'
+            })
+    }
+
     try {
         bcrypt.genSalt(saltRounds, function(err, salt) {
             bcrypt.hash(password, salt, async function(err,hashedPass) {
                 const [update] = await pool.query(`UPDATE user_profile SET password = ? WHERE user_id = ?`,[hashedPass,id]);
 
-                if(update.affectedRows = 0){
+                if(update.affectedRows === 0){
                         return res.status(404).json({
                             status:'Error',
                             message:'User not available'
@@ -206,6 +232,13 @@ const updateUserPassword = async (req, res) => {
 }
 const deleteUser = async (req, res) => {
     const{id} = req.params;
+    
+    if(id !== req.userId){
+            return res.status(403).json({
+                status:'Error',
+                message:'You dont have permission to remove this account'
+            })
+        }
     try {
         const [del_user] = await pool.query(`DELETE FROM user_profile WHERE user_id = ?`,[id]);
         if(del_user.affectedRows === 0){
