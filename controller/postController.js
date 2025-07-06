@@ -307,6 +307,12 @@ const updatePost = async (req,res) => {
     const {id} = req.params;
     const {title, body} = req.body;
     try {
+        if(id !== req.userId){
+            return res.status(403).json({
+                status:'Error',
+                message:'You do not have permission to make changes on this post. Post belongs to another user'
+            })
+        }
         const[update_post] = await pool.query(`UPDATE user_posts SET title = ?, body = ? WHERE post_id = ?`,[title, body,id]);
         if(update_post.affectedRows === 0){
             return res.status(404).json({
@@ -330,6 +336,12 @@ const updatePost = async (req,res) => {
 const deletePost = async (req,res) => {
     const {id} = req.params;
     try {
+        if(id !== req.userId){
+            return res.status(403).json({
+                status:'Error',
+                message:'You do not have permission to remove this post. Post belongs to another user'
+            })
+        }
         const[del_post] = await pool.query(`DELETE FROM user_posts WHERE post_id = ?`,[id]);
         if(del_post.affectedRows === 0){
             return res.status(404).json({
