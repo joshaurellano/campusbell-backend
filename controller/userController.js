@@ -124,6 +124,7 @@ const updateUser = async (req, res) => {
     const {id} = req.params;
     const {username,first_name,middle_name,last_name,email,phone_number,yr_level,program,region,province,city,town,barangay,street,house_no} = req.body;
 
+    try{
      if(id !== req.userId){
             return res.status(403).json({
                 status:'Error',
@@ -161,7 +162,37 @@ const updateUser = async (req, res) => {
                     message:'User not available'
                 })
             }
-                
+    } catch (err){
+         if(err.code === 'ER_DUP_ENTRY'){
+            // console.error(err.message)
+            if(err.message.includes('email')){
+            return res.status(409).json({
+                status:'Error',
+                message:'Email already in used'
+                });
+            }
+            else if(err.message.includes('phoneNumber' || 'phone_number')){
+            return res.status(409).json({
+                status:'Error',
+                message:'Phone Number already in used'
+                });
+            }
+            else if(err.message.includes('username')){
+            return res.status(409).json({
+                status:'Error',
+                message:'Username already in used'
+                });
+            }
+        }
+        //Other database error that is not handled here
+        else{
+            console.log(err);
+            return res.status(500).json({
+                status:'Error',
+                message:'There was an error processing the request'
+            });
+        }
+    }        
                 return res.status(200).json({
                     status:'Success',
                     message:'Update user successful'
