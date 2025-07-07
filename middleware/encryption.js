@@ -36,18 +36,26 @@ function decrypt(encryptedData, iv) {
   return decrypted;
 }
 function hashing(email, phone_number) {
-
+    if(email){
     const emailHash = crypto.createHash('sha256') 
         .update(email)
         .digest('hex')
-
+      return emailHash
+    }
+    if(phone_number){
     const phoneNumberHash = crypto.createHash('sha256')
         .update(phone_number)
         .digest('hex')
-  
-    return {emailHash,phoneNumberHash}
+    return phoneNumberHash
+      }
+    // return {emailHash,phoneNumberHash}
+}
+function createResetPasswordToken(email) {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  return resetToken
 }
 
 
 
-module.exports = {encrypt, decrypt, hashing}
+module.exports = {encrypt, decrypt, hashing, createResetPasswordToken}

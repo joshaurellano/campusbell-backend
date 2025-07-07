@@ -1,7 +1,7 @@
 const pool = require('../config/database');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const {encrypt, decrypt, hashing} = require('../middleware/encryption')
+const {encrypt, decrypt, hashing, createResetPasswordToken} = require('../middleware/encryption')
 
 /*Add input validation using express validation. Add the function on middleware folder*/
 
@@ -222,5 +222,28 @@ const userTokenInfo = async (req, res) => {
         })
     }
 }
+const requestPasswordReset = async (req,res) => {
+    const {email} = req.body;
 
-module.exports = {register,login,logout,userTokenInfo}
+    try {
+        const [findEmail] = await pool.query(`SELECT user_id, email FROM user_profile WHERE email = ?`,[email])
+        if(!findEmail){
+            return res.status(404).json({
+                status:'Error',
+                message:'The email is associated with any account'
+            })
+        }
+        const passwordResetToken = await createResetPasswordToken(email)
+        return res.status(200).json({
+            token:passwordResetToken
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            status:'Error',
+            message:'There was an error getting reading token'
+        })
+    }
+}
+
+module.exports = {register,login,logout,userTokenInfo,requestPasswordReset}
