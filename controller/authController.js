@@ -30,7 +30,8 @@ const register = async (req,res) => {
             encryptedDetails[field[i]] = JSON.stringify(result)
          }        
         
-        const hashed = hashing(req.body.email, req.body.phone_number)
+        const hashedEmail = hashing(req.body.email)
+        const hashedPhoneNumber = hashing(req.body.phone_number)
 
         const [rows] = await pool.query(`INSERT INTO user_profile (
             username,
@@ -58,9 +59,9 @@ const register = async (req,res) => {
                 encryptedDetails.middle_name,
                 encryptedDetails.last_name,
                 encryptedDetails.email,
-                hashed.emailHash,
+                hashedEmail,
                 encryptedDetails.phone_number,
-                hashed.phoneNumberHash,
+                hashedPhoneNumber,
                 encryptedDetails.yr_level,
                 encryptedDetails.program,
                 encryptedDetails.region,
@@ -230,11 +231,13 @@ const requestPasswordReset = async (req,res) => {
         if(!findEmail){
             return res.status(404).json({
                 status:'Error',
-                message:'The email is associated with any account'
+                message:'The email is not associated with any account'
             })
         }
         const passwordResetToken = await createResetPasswordToken(email)
         return res.status(200).json({
+            userID:findEmail[0].user_id,
+            email:findEmail[0].hashed_email,
             token:passwordResetToken
         })
     } catch (error) {
