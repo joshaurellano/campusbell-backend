@@ -251,5 +251,37 @@ const requestPasswordReset = async (req,res) => {
         })
     }
 }
+const verifyPasswordResetToken = async (req,res) => {
+    const{token} = req.params;
 
-module.exports = {register,login,logout,userTokenInfo,requestPasswordReset}
+    try {
+        const [checkToken] = await pool.query(`SELECT user_id, token, expiry FROM password_reset_token WHERE token = ?`,[token])
+        if(checkToken.length === 0){
+            return res.status(404).json({
+                status:'Error',
+                message:'Token not found'
+            })
+        }
+        const resetToken = checkToken[0]
+        const dateTimeNow = new Date (Date.now())
+        const tokenExpiry = new Date(resetToken.expiry);
+
+        if(dateTimeNow > tokenExpiry){
+            return res.status(410).json({
+                status:'Error',
+                message:'Token expired'
+            })
+        }
+        return res.status(200).json({
+            status:'Success',
+            result: resetToken.user_id
+        })
+    } catch (error) {
+        return res.status(500).json({
+            status:'Error',
+            message:'There was an error fetching the token'
+        })
+    }
+}
+
+module.exports = {register,login,logout,userTokenInfo,requestPasswordReset,verifyPasswordResetToken}
