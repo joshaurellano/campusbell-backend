@@ -237,13 +237,21 @@ const requestPasswordReset = async (req,res) => {
                 message:'The email is not associated with any account'
             })
         }
-        const passwordResetToken = await createResetPasswordToken(email)
+        const passwordResetToken = await createResetPasswordToken()
         const expiry = new Date(Date.now() + 10 * 60 * 1000)
         const otp = passwordResetToken;
         const purpose_id = '2'
+        const hashedToken = await hashing(passwordResetToken);
 
-        const [saveToken] = await pool.query(`INSERT INTO password_reset_token (user_id, token, expiry) VALUES (?,?,?)`,[findEmail[0].user_id, passwordResetToken, expiry])
-        const sendEmail = await sendMail(email, otp, purpose_id, findEmail[0].username)
+        async function saveToken_sendEmail (){
+        const results = await Promise.all([
+            pool.query(`INSERT INTO password_reset_token (user_id, token, expiry) VALUES (?,?,?)`,[findEmail[0].user_id, hashedToken, expiry]),
+            sendMail(email, otp, purpose_id, findEmail[0].username)
+        ])
+    }
+
+    await saveToken_sendEmail();
+
         return res.status(200).json({
             status:'Success',
             message:'Token generated and saved'
@@ -260,7 +268,8 @@ const verifyPasswordResetToken = async (req,res) => {
     const{token} = req.params;
 
     try {
-        const [checkToken] = await pool.query(`SELECT user_id, token, expiry FROM password_reset_token WHERE token = ?`,[token])
+        const hashToken = await hashing(token)
+        const [checkToken] = await pool.query(`SELECT user_id, token, expiry FROM password_reset_token WHERE token = ?`,[hashToken])
         if(checkToken.length === 0){
             return res.status(404).json({
                 status:'Error',
@@ -268,7 +277,7 @@ const verifyPasswordResetToken = async (req,res) => {
             })
         }
         const resetToken = checkToken[0]
-        const dateTimeNow = new Date (Date.now())
+        const dateTimeNow = new Date(Date.now())
         const tokenExpiry = new Date(resetToken.expiry);
 
         if(dateTimeNow > tokenExpiry){
@@ -279,7 +288,7 @@ const verifyPasswordResetToken = async (req,res) => {
         }
         return res.status(200).json({
             status:'Success',
-            result: resetToken.user_id
+            mesage:'Link verified'
         })
     } catch (error) {
         return res.status(500).json({

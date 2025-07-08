@@ -35,22 +35,26 @@ function decrypt(encryptedData, iv) {
 
   return decrypted;
 }
-function hashing(email, phone_number) {
+function hashing(email, phone_number, passwordResetToken) {
     if(email){
     const emailHash = crypto.createHash('sha256') 
         .update(email)
         .digest('hex')
       return emailHash
-    }
-    if(phone_number){
+    } else if(phone_number){
     const phoneNumberHash = crypto.createHash('sha256')
         .update(phone_number)
         .digest('hex')
     return phoneNumberHash
-      }
-    // return {emailHash,phoneNumberHash}
+      } else if(passwordResetToken){
+      const tokenHash = crypto.createHash('sha256')
+        .update(passwordResetToken)
+        .digest('hex')
+      return tokenHash
+    }
+    
 }
-function createResetPasswordToken(email) {
+function createResetPasswordToken() {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
   return resetToken
