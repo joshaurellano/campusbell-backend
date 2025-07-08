@@ -62,19 +62,21 @@ const sendMail = async (email,otp,purpose_id,username) => {
                         data : [
                             {
                             message:`
+                            <p style="color:#74787e">
                             Greetings, <br/><br/>
-    
+                            
                             Welcome to Campus Bell, a forum made by student for all students.</br>
-                            Before proceeding, get your OTP here so you can start interacting with other students </br> 
-                            >>> ${otp}. </br></br>
-
+                            Before proceeding, get your OTP here so you can start interacting with other students</p> </br> 
+                            <p style="text-align:center; font-weight:bold;font-size:24px;color:black"> ${otp} </p>
+                            
+                            <p style="color:#74787e">
                             Login with your username and enter your email and the otp for you to be verified. </br></br>
 
                             Feel free to ask questions to the community. We are all here to help one another. </br> </br>
 
                             Should you have any trouble don't hesitate to request guide from admins. <br/>
 
-                            Enjoy your stay!.`,
+                            Enjoy your stay!.</p>`,
                             }
                         ]
                     },
