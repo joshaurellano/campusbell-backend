@@ -4,40 +4,11 @@ const nodemailer = require('nodemailer');
 const Mailgen = require('mailgen');
 const pool = require('../config/database');
 
-const sendMail = async (email,otp,purpose_id) => {
-// const {email} = req.body;
+const sendMail = async (email,otp,purpose_id,username) => {
 
-console.log(email, otp)
     try {
-        //check for email input and otp key availability
-        const [check_if_email_otp_exist] = await pool.query(`SELECT otp.otp_id AS id,
-        otp.otp_key AS otp,
-        op.description AS purpose,
-        otp.expiry AS otpExpiry,
-        otp.created_at otp_date_created,
-        otp.user_id,
-        up.email,
-        up.username,
-        up.first_name AS firstName,
-        up.middle_name AS middleName,
-        up.last_name AS lastName
-        FROM otp_request otp INNER JOIN user_profile up ON otp.user_id = up.user_id
-        INNER JOIN otp_purpose op ON otp.purpose_id = op.purpose_id
-        WHERE up.email = ? ORDER BY otp.otp_id DESC`,[email])
-        
-        if(check_if_email_otp_exist.length === 0){
-            console.log(check_if_email_otp_exist[0])
-            // console.log(check_if_email_otp_exist[0].email)
-            // console.log(check_if_email_otp_exist[0].otp)
-            return res.status(404).json({
-                status:'Error',
-                message:'No OTP found'
-            })
-        }
-        // console.log(check_if_email_otp_exist[0].otp)
-        const otpKey = otp;
-        const firstName = check_if_email_otp_exist[0].firstName;
-        purpose = purpose_id;
+        const domain = process.env.DOMAIN
+        const purpose = purpose_id;
         let config = {
             service : 'gmail',
             auth : {
@@ -54,28 +25,24 @@ console.log(email, otp)
                 link : 'https://mailgen.js/'
             }
         })
-    
-        //Email Format
-        /* Need improvement.. */
-
-        /* List of improvements needed
-            - Add greeting
-            - Email too generic
-        */
        
         let response = null;
         if(purpose === '2') {
+            subject = 'Password Reset Request'
             response = {
                 body: {
-                    name : `${firstName}`,
-                    intro: "Your OTP Key",
+                    name : `${username}`,
+                    intro: "Password Change Request",
                     table : {
                         data : [
                             {
                             message:`
                             Greetings from Campus Bell, <br/><br/>
                                 
-                            Here is your otp code ${otpKey}. Please note that it is valid for 10 minutes only.
+                            We received a request to change your password. Please click on this link to continue <a href="${domain}${otp}">Link</a>.
+                            <br /><br />
+                            You can also copy and paste it into your browser ${domain}${otp}<br /><br />
+                            Please note that it is valid for 10 minutes only.
                             
                             If you did not request for this change, please update your password and secure your account`,
                             }
@@ -86,9 +53,10 @@ console.log(email, otp)
             }
         }
         else if(purpose === '3') {
+           subject = 'Password Reset Request'
             response = {
                 body: {
-                    name : `${firstName}`,
+                    name : `${username}`,
                     intro: "Your OTP Key",
                     table : {
                         data : [
@@ -106,9 +74,7 @@ console.log(email, otp)
 
                             Should you have any trouble don't hesitate to request guide from admins. <br/>
 
-                            Enjoy your stay!.
-
-                            `,
+                            Enjoy your stay!.`,
                             }
                         ]
                     },
@@ -119,7 +85,7 @@ console.log(email, otp)
         else {
             response = {
                 body: {
-                    name : `${firstName}`,
+                    name : `${username}`,
                     intro: "Your OTP Key",
                     table : {
                         data : [
@@ -127,7 +93,7 @@ console.log(email, otp)
                             message:`
                             Greetings from Campus Bell, <br/><br/>
                                 
-                            Here is your otp code ${otpKey}. Please note that it is valid for 10 minutes only.
+                            Here is your otp code. Please note that it is valid for 10 minutes only.
                             
                             If you did not request for this change, you can safely ignore this message.`,
                             }
@@ -143,23 +109,15 @@ console.log(email, otp)
         let message = {
             from : process.env.EMAIL,
             to : email,
-            subject: "OTP code",
+            subject,
             html: mail
         }
-        // transporter.sendMail(message).then(() =>{
-        //     console.log("Mail sent successfully")
-        //     })
-        transporter.sendMail(message);
-        // res.send({
-        //     status:'Success',
-        //     message:'Mail sent successfully'
-        // })
-        // res.send(response);
+ 
+        await transporter.sendMail(message);
+   
     } catch(error){
         console.error(error);
         throw error
     }
 }
-module.exports = {
-    sendMail
-}
+module.exports = { sendMail }

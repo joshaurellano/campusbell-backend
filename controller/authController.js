@@ -1,6 +1,8 @@
 const pool = require('../config/database');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+
+const {sendMail} = require('./mailController');
 const {encrypt, decrypt, hashing, createResetPasswordToken} = require('../middleware/encryption')
 
 /*Add input validation using express validation. Add the function on middleware folder*/
@@ -228,7 +230,7 @@ const requestPasswordReset = async (req,res) => {
     
     const hashedEmail = await hashing (email)
     try {
-        const [findEmail] = await pool.query(`SELECT user_id, hashed_email FROM user_profile WHERE hashed_email = ?`,[hashedEmail])
+        const [findEmail] = await pool.query(`SELECT user_id, username, hashed_email FROM user_profile WHERE hashed_email = ?`,[hashedEmail])
         if(findEmail.length === 0){
             return res.status(404).json({
                 status:'Error',
@@ -237,8 +239,11 @@ const requestPasswordReset = async (req,res) => {
         }
         const passwordResetToken = await createResetPasswordToken(email)
         const expiry = new Date(Date.now() + 10 * 60 * 1000)
+        const otp = passwordResetToken;
+        const purpose_id = '2'
 
         const [saveToken] = await pool.query(`INSERT INTO password_reset_token (user_id, token, expiry) VALUES (?,?,?)`,[findEmail[0].user_id, passwordResetToken, expiry])
+        const sendEmail = await sendMail(email, otp, purpose_id, findEmail[0].username)
         return res.status(200).json({
             status:'Success',
             message:'Token generated and saved'
