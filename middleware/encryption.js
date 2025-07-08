@@ -35,7 +35,7 @@ function decrypt(encryptedData, iv) {
 
   return decrypted;
 }
-function hashing(email, phone_number, passwordResetToken) {
+function hashing(email, phone_number, passwordResetToken, otp) {
     if(email){
     const emailHash = crypto.createHash('sha256') 
         .update(email)
@@ -51,7 +51,12 @@ function hashing(email, phone_number, passwordResetToken) {
         .update(passwordResetToken)
         .digest('hex')
       return tokenHash
-    }
+    } else if(otp){
+      const otpHash = crypto.createHash('sha256')
+        .update(otp)
+        .digest('hex')
+      return otpHash
+    } 
     
 }
 function createResetPasswordToken() {

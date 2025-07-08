@@ -53,7 +53,7 @@ const sendMail = async (email,otp,purpose_id,username) => {
             }
         }
         else if(purpose === '3') {
-           subject = 'Password Reset Request'
+           subject = 'Account Verification'
             response = {
                 body: {
                     name : `${username}`,
