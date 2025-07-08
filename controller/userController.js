@@ -146,7 +146,8 @@ const updateUser = async (req, res) => {
             // console.log(userAttribute[i], encrypting)
         }
         
-        const hashed = hashing(req.body.email, req.body.phone_number)
+        const hashedEmail = hashing(req.body.email)
+        const hashedPhoneNumber = hashing(req.body.phone_number)
 
     const[update_user] = await pool.query(`UPDATE user_profile 
             SET username = ?,first_name = ?,middle_name = ?,last_name = ?,
@@ -154,7 +155,7 @@ const updateUser = async (req, res) => {
             region = ?,province = ?,city = ?,town = ?,barangay = ?,street = ?,house_no = ?, hashed_email = ?, hashed_phoneNumber = ? WHERE user_id = ?`,
             [username,encrypting.first_name,encrypting.middle_name,encrypting.last_name,encrypting.email,
                 encrypting.phone_number,encrypting.yr_level,encrypting.program,encrypting.region,encrypting.province,
-                encrypting.city,encrypting.town,encrypting.barangay,encrypting.street,encrypting.house_no,hashed.emailHash,hashed.phoneNumberHash,id]);
+                encrypting.city,encrypting.town,encrypting.barangay,encrypting.street,encrypting.house_no,hashedEmail,hashedPhoneNumber,id]);
             
             if(update_user.affectedRows === 0){
                 return res.status(404).json({

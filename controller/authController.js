@@ -225,26 +225,29 @@ const userTokenInfo = async (req, res) => {
 }
 const requestPasswordReset = async (req,res) => {
     const {email} = req.body;
-
+    
+    const hashedEmail = await hashing (email)
     try {
-        const [findEmail] = await pool.query(`SELECT user_id, email FROM user_profile WHERE email = ?`,[email])
-        if(!findEmail){
+        const [findEmail] = await pool.query(`SELECT user_id, hashed_email FROM user_profile WHERE hashed_email = ?`,[hashedEmail])
+        if(findEmail.length === 0){
             return res.status(404).json({
                 status:'Error',
                 message:'The email is not associated with any account'
             })
         }
         const passwordResetToken = await createResetPasswordToken(email)
+        const expiry = new Date(Date.now() + 10 * 60 * 1000)
+
+        const [saveToken] = await pool.query(`INSERT INTO password_reset_token (user_id, token, expiry) VALUES (?,?,?)`,[findEmail[0].user_id, passwordResetToken, expiry])
         return res.status(200).json({
-            userID:findEmail[0].user_id,
-            email:findEmail[0].hashed_email,
-            token:passwordResetToken
+            status:'Success',
+            message:'Token generated and saved'
         })
     } catch (error) {
         console.error(error)
         return res.status(500).json({
             status:'Error',
-            message:'There was an error getting reading token'
+            message:'There was an error generating token'
         })
     }
 }
