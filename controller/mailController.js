@@ -70,7 +70,7 @@ const sendMail = async (email,otp,purpose_id,username) => {
                             <p style="text-align:center; font-weight:bold;font-size:24px;color:black"> ${otp} </p>
                             
                             <p style="color:#74787e">
-                            Login with your username and enter your email and the otp for you to be verified. </br></br>
+                            Login with your username and password and after that, you will be redirected to a form to verify your account. Enter your email and the otp to continue. </br></br>
 
                             Feel free to ask questions to the community. We are all here to help one another. </br> </br>
 

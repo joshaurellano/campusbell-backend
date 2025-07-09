@@ -76,7 +76,6 @@ const verify_otp = async (req,res) => {
         const otp_expiry = new Date(verify[0].expiry); 
         const dateTimeNow = new Date();
         
-        console.log(otp_expiry.toLocaleTimeString());
         if(dateTimeNow > otp_expiry) {
             return res.status(403).json({
                 status:'Error',
