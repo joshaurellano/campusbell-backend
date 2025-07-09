@@ -37,14 +37,21 @@ const sendMail = async (email,otp,purpose_id,username) => {
                         data : [
                             {
                             message:`
-                            Greetings from Campus Bell, <br/><br/>
-                                
-                            We received a request to change your password. Please click on this link to continue <a href="${domain}${otp}">Link</a>.
-                            <br /><br />
-                            You can also copy and paste it into your browser ${domain}${otp}<br /><br />
-                            Please note that it is valid for 10 minutes only.
-                            
-                            If you did not request for this change, please update your password and secure your account`,
+                            <p style="color:#74787e">
+                            Greetings from Campus Bell,</p> <br/>
+
+                            <p style="color:#74787e">
+                            We received a request to change your password. Please click on this link to continue <a href="${domain}${otp}">Link</a> </p>.
+                            <br />
+
+                            <p style="color:#74787e">
+                            You can also copy and paste it into your browser ${domain}${otp} </p><br />
+
+                            <p style="color:#74787e">
+                            Please note that it is valid for 10 minutes only.</p>
+
+                            <p style="color:#74787e">
+                            If you did not request for this change, please update your password and secure your account. </p> `,
                             }
                         ]
                     },
