@@ -225,28 +225,47 @@ const updateProfileImage = async (req, res) => {
 }
 const updateUserPassword = async (req, res) => {
     const {id} = req.params;
-    const {password} = req.body;
+    const {password, token} = req.body;
     const saltRounds = 10;
     
-    try {
-        bcrypt.genSalt(saltRounds, function(err, salt) {
-            bcrypt.hash(password, salt, async function(err,hashedPass) {
-                const [update] = await pool.query(`UPDATE user_profile SET password = ? WHERE user_id = ?`,[hashedPass,id]);
-
-                if(update.affectedRows === 0){
-                        return res.status(404).json({
-                            status:'Error',
-                            message:'User not available'
-                        })
-                    }
-                    else{
-                        return res.status(200).json({
-                            status:'Success',
-                            message:'Update user password successful'
-                        })
-                    }
-            })
+    if(!password || !token){
+        return res.status(400).json({
+            status:'Error',
+            message:'password or token missing'
         })
+    }
+    try {
+        const [checkToken] = await pool.query(`SELECT user_id FROM password_reset_token WHERE token = ?`,[token])
+        if(checkToken.length === 0) {
+            return res.status(404).json({
+                status:'Error',
+                message:'Token not available'
+            })
+        } else {
+            if(checkToken[0].user_id !== parseInt(id)){
+                return res.status(403).json({
+                    status:'Error',
+                    message:'You are not allowed to make changes into this account'
+                })
+            }
+            const hashedPass = await bcrypt.hash(password, saltRounds) 
+            
+            const [update] = await pool.query(`UPDATE user_profile SET password = ? WHERE user_id = ?`,[hashedPass,id]);
+
+            if(update.affectedRows === 0){
+                return res.status(404).json({
+                    status:'Error',
+                    message:'User not available'
+                })
+            }
+            else{
+                await pool.query(`DELETE FROM password_reset_token WHERE token = ? `,[token])
+                return res.status(200).json({
+                    status:'Success',
+                    message:'Update user password successful'
+                })
+            }
+    }
     } catch (error) {
         console.error(error);
         return res.status(500).json({
