@@ -283,12 +283,13 @@ const verifyPasswordResetToken = async (req,res) => {
         if(dateTimeNow > tokenExpiry){
             return res.status(410).json({
                 status:'Error',
-                message:'Token expired'
+                message:'Token expired',
             })
         }
         return res.status(200).json({
             status:'Success',
-            mesage:'Link verified'
+            mesage:'Link verified',
+            result: checkToken[0]
         })
     } catch (error) {
         return res.status(500).json({

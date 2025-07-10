@@ -228,13 +228,6 @@ const updateUserPassword = async (req, res) => {
     const {password} = req.body;
     const saltRounds = 10;
     
-    if(id !== req.userId){
-            return res.status(403).json({
-                status:'Error',
-                message:'You dont have permission to make changes on this account'
-            })
-    }
-
     try {
         bcrypt.genSalt(saltRounds, function(err, salt) {
             bcrypt.hash(password, salt, async function(err,hashedPass) {
