@@ -235,7 +235,8 @@ const updateUserPassword = async (req, res) => {
         })
     }
     try {
-        const [checkToken] = await pool.query(`SELECT user_id FROM password_reset_token WHERE token = ?`,[token])
+        const hashToken = await hashing(token)
+        const [checkToken] = await pool.query(`SELECT user_id FROM password_reset_token WHERE token = ?`,[hashToken])
         if(checkToken.length === 0) {
             return res.status(404).json({
                 status:'Error',
