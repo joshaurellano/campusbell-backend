@@ -224,14 +224,14 @@ const updateProfileImage = async (req, res) => {
     }
 }
 const updateUserPassword = async (req, res) => {
-    const {id} = req.params;
-    const {password, token} = req.body;
+    const {token} = req.params;
+    const {password} = req.body;
     const saltRounds = 10;
     
-    if(!password || !token){
+    if(!password){
         return res.status(400).json({
             status:'Error',
-            message:'password or token missing'
+            message:'password missing'
         })
     }
     try {
@@ -242,14 +242,9 @@ const updateUserPassword = async (req, res) => {
                 message:'Token not available'
             })
         } else {
-            if(checkToken[0].user_id !== parseInt(id)){
-                return res.status(403).json({
-                    status:'Error',
-                    message:'You are not allowed to make changes into this account'
-                })
-            }
-            const hashedPass = await bcrypt.hash(password, saltRounds) 
             
+            const hashedPass = await bcrypt.hash(password, saltRounds) 
+            const id = checkToken[0].user_id
             const [update] = await pool.query(`UPDATE user_profile SET password = ? WHERE user_id = ?`,[hashedPass,id]);
 
             if(update.affectedRows === 0){
