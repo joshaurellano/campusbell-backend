@@ -1,6 +1,6 @@
 const pool  = require("../config/database");
 const {sendMail} = require('./mailController')
-const {hashing} = require('../middleware/encryption');
+const {hashing, decrypt} = require('../middleware/encryption');
 /*This Controller contains all the functions related to OTP. From generating saving up to verifying*/
 const generate_otp = async (req,res) => {
     //Variable and values declaration
@@ -40,6 +40,42 @@ const generate_otp = async (req,res) => {
 } catch (error){
     console.error(error)
 }
+}
+const requestAnotherOtp = async (req, res) => {
+    const{phone_number,purpose_id} = req.body;
+    const otpKey = Math.floor(100000 + Math.random() * 900000);
+    const otp = String(otpKey)
+    const minute = 1000 * 600;
+
+    let expiry = (Date.now() + minute);
+    const expiry_time = new Date(expiry);
+    
+    try {
+        const hashPhoneNumber = await hashing(phone_number);
+        const [emailPhoneNumber] = await pool.query(`SELECT hashed_email, email, user_id, username from user_profile WHERE hashed_phoneNumber = ?`,[hashPhoneNumber])
+        
+        if(emailPhoneNumber.length === 0){
+            return res.status(404).json({
+                status:'Error',
+                message:'Phone Number is not associated with any account. Email not found'
+            })
+        }
+        const result = emailPhoneNumber[0];
+        const user_id = result.user_id
+        const username = result.username
+        const parseEmail = JSON.parse(result.email)
+        const email = decrypt(parseEmail.encryptedData, parseEmail.iv)
+
+        const save_sendOtp = async () =>{
+            const result = await Promise.all([
+                await save_otp(user_id,otp, purpose_id, expiry_time),
+                await sendMail(email,otp,purpose_id,username)
+            ])
+        }
+        await save_sendOtp();
+    } catch (error) {
+        console.error(error)
+    }
 }
 const save_otp = async (user_id, otp, purpose_id, expiry_time) => {
     try{
@@ -123,4 +159,4 @@ const clear_otp = async () => {
         throw (error);
     }
 }
-module.exports = {generate_otp,verify_otp,clear_otp}
+module.exports = {generate_otp,verify_otp,clear_otp,requestAnotherOtp}
