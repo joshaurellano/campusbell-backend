@@ -255,7 +255,7 @@ const updateUserPassword = async (req, res) => {
                 })
             }
             else{
-                await pool.query(`DELETE FROM password_reset_token WHERE token = ? `,[token])
+                await pool.query(`DELETE FROM password_reset_token WHERE token = ? `,[hashToken])
                 return res.status(200).json({
                     status:'Success',
                     message:'Update user password successful'
