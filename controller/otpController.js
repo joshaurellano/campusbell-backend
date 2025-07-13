@@ -57,7 +57,7 @@ const requestAnotherOtp = async (req, res) => {
         if(emailPhoneNumber.length === 0){
             return res.status(404).json({
                 status:'Error',
-                message:'Phone Number is not associated with any account. Email not found'
+                message:'Phone Number is not associated with any account.'
             })
         }
         const result = emailPhoneNumber[0];
@@ -73,6 +73,11 @@ const requestAnotherOtp = async (req, res) => {
             ])
         }
         await save_sendOtp();
+
+        return res.status(200).json({
+            status:'Success',
+            message:'OTP regeneratio success'
+        })
     } catch (error) {
         console.error(error)
     }
