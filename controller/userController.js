@@ -66,12 +66,13 @@ const getUser = async (req, res) => {
 						'post_title',p.title,
 						'post_content',p.body,
 						'post_posted',p.created_at,
-						'post_image',p.image
+						'post_image',p.image,
+                        'post_reacts',(SELECT COUNT(*) FROM post_react WHERE react_post_id = p.post_id),
+                        'comment_count',(SELECT COUNT(*) FROM post_comments WHERE post_id = p.post_id) 
                     ) AS post_data FROM user_posts p 
                     INNER JOIN forum_topics t ON p.topic_id = t.topic_id 
                     WHERE p.user_id = up.user_id 
                     ORDER BY p.created_at DESC
-                    LIMIT 10
                 ) AS ordered_posts
 			) AS posts
             FROM user_profile up WHERE up.user_id = ?`,[id]);
