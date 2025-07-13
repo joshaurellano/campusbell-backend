@@ -308,7 +308,7 @@ const updatePost = async (req,res) => {
     const {title, body} = req.body;
     try {
         const [userID] = await pool.query(`SELECT user_id FROM user_posts WHERE post_id = ?`,[id])
-        if(userID[0].user_id !== req.userId){
+        if(userID[0].user_id !== parseInt(req.userId)){
             return res.status(403).json({
                 status:'Error',
                 message:'You do not have permission to make changes on this post. Post belongs to another user'
@@ -326,7 +326,7 @@ const updatePost = async (req,res) => {
             message:'Post updated successfully'
         })
     } catch (error) {
-        // console.error(error);
+        console.error(error);
         return res.status(500).json({
             status:'Error',
             message:'There was an error processing your request'
@@ -338,7 +338,7 @@ const deletePost = async (req,res) => {
     const {id} = req.params;
     try {
         const [userID] = await pool.query(`SELECT user_id FROM user_posts WHERE post_id = ?`,[id])
-        if(userID[0].user_id !== req.userId){
+        if(userID[0].user_id !== parseInt(req.userId)){
             return res.status(403).json({
                 status:'Error',
                 message:'You do not have permission to remove this post. Post belongs to another user'
