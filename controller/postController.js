@@ -28,7 +28,8 @@ const getAllPost = async (req,res) => {
     const limit = parseInt(req.query.limit);
     const lastId = parseInt(req.query.lastId)
     let dbQuery;
-    let values
+    let values;
+    let moreItems;
     if(page > 1){
             dbQuery = `SELECT 
             p.post_id AS postID,
@@ -155,9 +156,11 @@ const getAllPost = async (req,res) => {
         const[get_all_post] = await pool.query(dbQuery,values)
         
         if(get_all_post.length === 0){
+            moreItems = false
             return res.status(404).json({
+                more_items:moreItems,
                 status:'Error',
-                message:'No post available'
+                message:'No data available'
             })
         }
         
@@ -169,13 +172,17 @@ const getAllPost = async (req,res) => {
         };
     }));
     
-    let moreItems
     const nextID = get_all_post.length?get_all_post[get_all_post.length -1].postID: null
         if(nextID > 0){
             moreItems = true
-        } else {
+        } else if(nextID === 1) {
             moreItems = false
         }
+    if(moreItems === false) {
+        return res.json({
+            message:'No more data available'
+        })
+    }
 
         return res.status(200).json({
             status:'Success',
