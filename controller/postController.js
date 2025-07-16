@@ -27,9 +27,10 @@ const getAllPost = async (req,res) => {
     const page  = parseInt(req.query.page)
     const limit = parseInt(req.query.limit);
     const lastId = parseInt(req.query.lastId)
-   
-    try {
-        const[get_all_post] = await pool.query(`SELECT 
+    let dbQuery;
+    let values
+    if(page > 1){
+            dbQuery = `SELECT 
             p.post_id AS postID,
             u.username AS username,
             t.topic_name,
@@ -86,7 +87,72 @@ const getAllPost = async (req,res) => {
                     ) AS ordered_users
             ) AS reactors FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
             INNER JOIN forum_topics t ON p.topic_id = t.topic_id
-            ORDER BY p.created_at DESC LIMIT ?`, [limit])
+            WHERE p.post_id < ?
+            ORDER BY p.created_at DESC LIMIT ?`
+            values = [lastId, limit]
+    }else {
+            dbQuery = `SELECT 
+            p.post_id AS postID,
+            u.username AS username,
+            t.topic_name,
+            p.title AS title,
+            p.body AS content,
+            p.created_at AS date_posted,
+            p.image,
+            (
+                    SELECT COUNT(*) FROM post_comments c WHERE c.post_id = p.post_id
+                ) AS commentCount,
+
+                (
+                    SELECT JSON_ARRAYAGG(comment_data)
+                        
+                    FROM
+                        (
+                            SELECT JSON_OBJECT(
+                                'commentID',c.comment_id,
+                                'username',cu.username,
+                                'body',c.body,
+                                'date_posted',c.created_at,
+                                'replyCount',
+                                (
+                                    SELECT COUNT(*) FROM comment_reply r WHERE r.comment_id = c.comment_id
+                                ),
+                                'replies', (
+                                    SELECT 
+                                        JSON_ARRAYAGG(reply_data)
+                                        FROM (
+                                            SELECT JSON_OBJECT(
+                                                'replyID',r.reply_id,
+                                                'username',ru.username,
+                                                'body',r.body,
+                                                'date_posted',r.created_at
+                                            ) AS reply_data FROM comment_reply r LEFT JOIN user_profile ru
+                                            ON ru.user_id = r.user_id
+                                            WHERE r.comment_id = c.comment_id
+                                            ORDER BY r.created_at DESC
+                                        ) AS ordered_replies
+                                )
+                            ) AS comment_data FROM post_comments c 
+                            LEFT JOIN user_profile cu 
+                            ON c.user_id = cu.user_id
+                            WHERE c.post_id = p.post_id
+                            ORDER BY c.created_at DESC
+                        ) AS ordered_comments
+                    ) AS comments,(SELECT COUNT(*) FROM post_react WHERE react_post_id = p.post_id ) AS reactCount,(
+            SELECT JSON_ARRAYAGG (react_data) FROM 
+            (
+                SELECT JSON_OBJECT(
+                'userId',u.user_id,
+                'username',u.username,
+                'react_time',react_time) AS react_data FROM user_profile u INNER JOIN post_react ON u.user_id = react_user_id WHERE post_react.react_post_id = p.post_id
+                    ) AS ordered_users
+            ) AS reactors FROM user_posts p INNER JOIN user_profile u ON p.user_id = u.user_id 
+            INNER JOIN forum_topics t ON p.topic_id = t.topic_id
+            ORDER BY p.created_at DESC LIMIT ?`
+            values = [limit]
+    }
+    try {
+        const[get_all_post] = await pool.query(dbQuery,values)
         
         if(get_all_post.length === 0){
             return res.status(404).json({
@@ -102,9 +168,9 @@ const getAllPost = async (req,res) => {
             reacted: hasReacted
         };
     }));
-    const nextID = get_all_post.length?get_all_post[get_all_post.length-1].postID:null
+    
     let moreItems
-
+    const nextID = get_all_post.length?get_all_post[get_all_post.length -1].postID: null
         if(nextID > 0){
             moreItems = true
         } else {
