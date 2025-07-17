@@ -17,6 +17,7 @@ const imgUploadRoutes = require('./routes/imgUploadRoutes');
 const reactsRoutes = require('./routes/reactsRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const freedomwallRoutes = require('./routes/freedomwallRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 const {clear_otp} = require('./controller/otpController');
 
@@ -55,6 +56,7 @@ app.use('/upload',imgUploadRoutes);
 app.use('/react',reactsRoutes);
 app.use('/alert',notificationRoutes);
 app.use('/freedomwall',freedomwallRoutes);
+app.use('/search',searchRoutes);
 
 
 cron.schedule ('* * * * Sunday', async () =>{
