@@ -11,13 +11,13 @@ const searchUser = async (req, res) => {
     }
     let dbQuery = `SELECT user_id, 
             username, first_name, last_name FROM user_profile 
-            WHERE username LIKE ?`
+            WHERE username LIKE ? or username LIKE ?`
 
     let dbPostQuery = `SELECT p.post_id,p.title,p.body, p.created_at, 
     u.user_id, u.username FROM user_posts p INNER JOIN user_profile u 
-    ON p.user_id = u.user_id WHERE p.title LIKE ? ORDER BY p.created_at DESC LIMIT 5`
+    ON p.user_id = u.user_id WHERE p.title LIKE ? OR p.title LIKE ? ORDER BY p.created_at DESC LIMIT 5`
 
-    let values = [`${search}%`]
+    let values = [`${search}%`,`%${search}%`]
     
     try {
         const [userResult, postResult] = await Promise.allSettled ([
@@ -27,12 +27,7 @@ const searchUser = async (req, res) => {
             const user_result = userResult.status === 'fulfilled' ? userResult.value[0] : []
             const post_result = postResult.status === 'fulfilled' ? postResult.value[0] : []
             
-            if(user_result.length === 0 && post_result.length === 0){
-                return res.status(404).json({
-                    status:'Error',
-                    message:'No available information matches the search'
-                })
-            }
+           
             if(user_result.length > 0){
                 for(let i=0; i<user_result.length; i++){
                     
@@ -48,6 +43,12 @@ const searchUser = async (req, res) => {
                         console.error(`Decryption failed for user index ${i}`, error)
                     }
                 }
+            }
+            if(user_result.length === 0 && post_result.length === 0){
+                return res.status(404).json({
+                    status:'Error',
+                    message:'No available information matches the search'
+                })
             }
         return res.status(200).json({
             status:'Success',
