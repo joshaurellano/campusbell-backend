@@ -4,9 +4,12 @@ const pool = require('../config/database');
 const addNotification = async (notification_type,notified_id,notifier_id,post_id) => {
     try {
         const [add_notification] = await pool.query(`INSERT INTO alert_notification (notification_type,notified_userid,notifier_userid,post_id) VALUES (?,?,?,?)`,[notification_type,notified_id,notifier_id,post_id]);    
-        console.log('notification successfully created')
+        // console.log('notification successfully created')
     } catch (error) {
-        console.error(error);
+        return res.status(500).json({
+            status:'Error',
+            message:'There was an error sending notification'
+        })
     }
 }
 
@@ -49,7 +52,7 @@ const getAllAlerts = async (req,res) => {
             result:get_all_alert
         })
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         return res.status(500).json({
             status:'Error',
             message:'There was an error getting alerts'
@@ -62,15 +65,7 @@ const getAlert = async (req,res) => {
     const{id} = req.params;
     try {
         const[get_alert] = await pool.query(
-            // `SELECT an.notification_id, p.post_id, p.title, 
-            // nt.description, u.username AS 'notifier', an.is_read, un.username AS 'notified',an.created_at FROM alert_notification an 
-            // INNER JOIN user_posts p ON an.post_id = p.post_id
-            // JOIN notification_type nt ON nt.type_id = an.notification_type
-            // JOIN user_profile u ON u.user_id = an.notifier_userid
-            // JOIN user_profile un ON un.user_id = an.notified_userid
-            // WHERE an.notified_userid = ? AND an.is_read = FALSE
-            // ORDER BY an.created_at DESC`
-            ` SELECT u.user_id,u.username,
+            `SELECT u.user_id,u.username,
             (
                 SELECT JSON_ARRAYAGG(notifData) FROM (
                 SELECT JSON_OBJECT('postID', p.post_id,'title',p.title,
@@ -82,7 +77,7 @@ const getAlert = async (req,res) => {
                                 'notifID',r_an.notification_id,
                                 'reactorID',r_an.notifier_userid,
                                 'reactorusername', ru.username,
-                                'reactTime', r_an.created_at) AS reactData FROM alert_notification r_an JOIN user_profile ru ON r_an.notifier_userid = ru.user_id WHERE r_an.post_id = p.post_id AND r_an.notification_type = 1
+                                'reactTime', r_an.created_at) AS reactData FROM alert_notification r_an JOIN user_profile ru ON r_an.notifier_userid = ru.user_id WHERE r_an.post_id = p.post_id AND r_an.notification_type = 1 ORDER BY r_an.created_at DESC
                             ) AS postReactNotif
                     ),
                 'comment', 
@@ -93,13 +88,13 @@ const getAlert = async (req,res) => {
                                 'notifID',c_an.notification_id,
                                 'commenterID',c_an.notifier_userid,
                                 'commenterusername',cu.username,
-                                'commentTime',c_an.created_at) AS commentData FROM alert_notification c_an JOIN user_profile cu ON c_an.notifier_userid = cu.user_id WHERE c_an.post_id = p.post_id AND c_an.notification_type = 2
+                                'commentTime',c_an.created_at) AS commentData FROM alert_notification c_an JOIN user_profile cu ON c_an.notifier_userid = cu.user_id WHERE c_an.post_id = p.post_id AND c_an.notification_type = 2 ORDER BY C_an.created_at DESC
                             ) AS postCommentData
                     )
                 ) AS notifData 
                     FROM user_posts p WHERE p.user_id = u.user_id AND (
-                        EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 1) OR 
-                            EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 2) )
+                        EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 1 AND an.is_read = FALSE) OR 
+                            EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 2 AND an.is_read = FALSE) )
                     ) AS posts
             ) AS postData, (SELECT COUNT(*) FROM alert_notification an WHERE an.notified_userid = u.user_id AND an.is_read = FALSE ) AS unreadNotif FROM user_profile u WHERE u.user_id = ?`
             ,[id]);
@@ -109,7 +104,6 @@ const getAlert = async (req,res) => {
             result:get_alert
         })
     } catch (error) {
-         console.error(error);
          return res.status(500).json({
             status:'Error',
             message:'There was an error getting the post'
@@ -155,7 +149,7 @@ const getAlertByPost = async (req,res) => {
             result:get_alert[0]
         })
     } catch (error) {
-         console.error(error);
+         //console.error(error);
          return res.status(500).json({
             status:'Error',
             message:'There was an error getting the post'
@@ -174,7 +168,6 @@ const updateAlert = async (req,res) => {
         } else {
             ids = ids.map(ids => parseInt(ids))
         }
-        
         const [checkUserId] = await pool.query(`SELECT notified_userid FROM alert_notification WHERE notification_id IN (?)`,[ids])
         if(checkUserId.length === 0){
             return res.status(404).json({
@@ -191,7 +184,6 @@ const updateAlert = async (req,res) => {
             }
         }
         const [update_post] = await pool.query(`UPDATE alert_notification SET is_read = TRUE WHERE notification_id IN (?)`,[ids]);
-        console.log(update_post)
         return res.status(200).json({
             status:'Success',
             message:'Alerts updated'
