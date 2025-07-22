@@ -77,7 +77,7 @@ const getAlert = async (req,res) => {
                                 'notifID',r_an.notification_id,
                                 'reactorID',r_an.notifier_userid,
                                 'reactorusername', ru.username,
-                                'reactTime', r_an.created_at) AS reactData FROM alert_notification r_an JOIN user_profile ru ON r_an.notifier_userid = ru.user_id WHERE r_an.post_id = p.post_id AND r_an.notification_type = 1 ORDER BY r_an.created_at DESC
+                                'reactTime', r_an.created_at) AS reactData FROM alert_notification r_an JOIN user_profile ru ON r_an.notifier_userid = ru.user_id WHERE r_an.post_id = p.post_id AND r_an.notification_type = 1 AND r_an.is_read = FALSE ORDER BY r_an.created_at DESC
                             ) AS postReactNotif
                     ),
                 'comment', 
@@ -88,7 +88,7 @@ const getAlert = async (req,res) => {
                                 'notifID',c_an.notification_id,
                                 'commenterID',c_an.notifier_userid,
                                 'commenterusername',cu.username,
-                                'commentTime',c_an.created_at) AS commentData FROM alert_notification c_an JOIN user_profile cu ON c_an.notifier_userid = cu.user_id WHERE c_an.post_id = p.post_id AND c_an.notification_type = 2 ORDER BY C_an.created_at DESC
+                                'commentTime',c_an.created_at) AS commentData FROM alert_notification c_an JOIN user_profile cu ON c_an.notifier_userid = cu.user_id WHERE c_an.post_id = p.post_id AND c_an.notification_type = 2 AND c_an.is_read = FALSE ORDER BY c_an.created_at DESC
                             ) AS postCommentData
                     )
                 ) AS notifData 
@@ -104,9 +104,10 @@ const getAlert = async (req,res) => {
             result:get_alert
         })
     } catch (error) {
+        console.error(error)
          return res.status(500).json({
             status:'Error',
-            message:'There was an error getting the post'
+            message:'There was an error getting alerts'
         })
     }
 }
