@@ -8,6 +8,6 @@ const router = express.Router();
 router.get('/',authenticateToken,getAllAlerts);
 router.get('/user/:id',authenticateToken,getAlert);
 router.get('/post/:id',authenticateToken,getAlertByPost);
-router.put('/',authenticateToken,updateAlert);
+router.put('/:id',authenticateToken,updateAlert);
 
 module.exports = router;
