@@ -154,7 +154,7 @@ const updateUser = async (req, res) => {
             SET username = ?,first_name = ?,middle_name = ?,last_name = ?,
             email = ?,phone_number = ?,yr_level = ?,program = ?,
             region = ?,province = ?,city = ?,town = ?,barangay = ?,street = ?,house_no = ?, hashed_email = ?, hashed_phoneNumber = ? WHERE user_id = ?`,
-            [username,encrypting.first_name,encrypting.middle_name,encrypting.last_name,encrypting.email,
+            [username,first_name,middle_name,last_name,encrypting.email,
                 encrypting.phone_number,encrypting.yr_level,encrypting.program,encrypting.region,encrypting.province,
                 encrypting.city,encrypting.town,encrypting.barangay,encrypting.street,encrypting.house_no,hashedEmail,hashedPhoneNumber,id]);
             

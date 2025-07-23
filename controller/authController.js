@@ -57,9 +57,9 @@ const register = async (req,res) => {
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [   username,
                 hashedPass,
-                encryptedDetails.first_name,
-                encryptedDetails.middle_name,
-                encryptedDetails.last_name,
+                first_name,
+                middle_name,
+                last_name,
                 encryptedDetails.email,
                 hashedEmail,
                 encryptedDetails.phone_number,
@@ -115,14 +115,13 @@ const register = async (req,res) => {
         }
         //Other database error that is not handled here
         else{
-            console.log(err);
+            //console.log(err);
             return res.status(500).json({
                 status:'Error',
                 message:'There was an error processing the request'
             });
         }
     }
-
 }  
 const login = async (req,res) => {
     const {username, password} = req.body;
