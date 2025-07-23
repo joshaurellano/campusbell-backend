@@ -39,6 +39,7 @@ const getUser = async (req, res) => {
         }
         const [get_user] = await pool.query(`
            SELECT 
+            up.user_id,
             up.username,
             up.profile_image,
             up.first_name,
@@ -56,6 +57,7 @@ const getUser = async (req, res) => {
             up.street,
             up.house_no, 
             up.role_id,
+            ur.name AS role,
             (
 				SELECT JSON_ARRAYAGG(post_data) 
                 FROM (
@@ -75,7 +77,8 @@ const getUser = async (req, res) => {
                     ORDER BY p.created_at DESC
                 ) AS ordered_posts
 			) AS posts
-            FROM user_profile up WHERE up.user_id = ?`,[id]);
+            FROM user_profile up INNER JOIN user_roles ur ON up.role_id = ur.role_id
+            WHERE up.user_id = ?`,[id]);
         if(get_user.length === 0){
             return res.status(404).json({
                 status:'Error',
@@ -118,6 +121,57 @@ const getUser = async (req, res) => {
         return res.status(500).json({
             status:'Error',
             message:'There was an error retrieving the user'
+        })
+    }
+}
+const viewUser = async (req, res) => {
+    const {id} = req.params
+
+    try {
+        const [view_user] = await pool.query(`SELECT 
+            up.username,
+            up.profile_image,
+            up.first_name,
+            up.middle_name,
+            up.last_name,
+            up.role_id,
+            ur.name AS role,
+            (
+				SELECT JSON_ARRAYAGG(post_data) 
+                FROM (
+					SELECT JSON_OBJECT(
+						'postId',p.post_id,
+						'topicId',p.topic_id,
+                        'topic_name',t.topic_name,
+						'post_title',p.title,
+						'post_content',p.body,
+						'post_posted',p.created_at,
+						'post_image',p.image,
+                        'post_reacts',(SELECT COUNT(*) FROM post_react WHERE react_post_id = p.post_id),
+                        'comment_count',(SELECT COUNT(*) FROM post_comments WHERE post_id = p.post_id) 
+                    ) AS post_data FROM user_posts p 
+                    INNER JOIN forum_topics t ON p.topic_id = t.topic_id 
+                    WHERE p.user_id = up.user_id 
+                    ORDER BY p.created_at DESC
+                ) AS ordered_posts
+			) AS posts
+            FROM user_profile up INNER JOIN user_roles ur ON up.role_id = ur.role_id
+            WHERE up.user_id = ?`,[id])
+
+            if(view_user.length === 0){
+                return res.status(404).json({
+                    status:'Error',
+                    message:'User is not available'
+                })
+            }
+            return res.status(200).json({
+                status:'Success',
+                result: view_user[0]
+            })
+    } catch (error) {
+        return res.status(500).json({
+            status:'Error',
+            message:'There wasan error fetching the user'
         })
     }
 }
@@ -302,4 +356,4 @@ const deleteUser = async (req, res) => {
     }
 
 }
-module.exports = {getAllUsers,getUser,updateUser,updateProfileImage,updateUserPassword,deleteUser};
+module.exports = {getAllUsers,getUser,updateUser,updateProfileImage,updateUserPassword,deleteUser,viewUser};
