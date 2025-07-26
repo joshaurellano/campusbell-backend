@@ -28,22 +28,6 @@ const searchUser = async (req, res) => {
             const post_result = postResult.status === 'fulfilled' ? postResult.value[0] : []
             
            
-            if(user_result.length > 0){
-                for(let i=0; i<user_result.length; i++){
-                    
-                    try{
-                        const parseFirstName = JSON.parse(user_result[i].first_name)
-                        const parseLastname = JSON.parse(user_result[i].last_name)
-                        const decryptedFirstName = decrypt(parseFirstName.encryptedData, parseFirstName.iv)
-                        const decryptedLastName = decrypt(parseLastname.encryptedData, parseLastname.iv)
-
-                        user_result[i].first_name = decryptedFirstName
-                        user_result[i].last_name = decryptedLastName
-                    } catch (error) {
-                        console.error(`Decryption failed for user index ${i}`, error)
-                    }
-                }
-            }
             if(user_result.length === 0 && post_result.length === 0){
                 return res.status(404).json({
                     status:'Error',
