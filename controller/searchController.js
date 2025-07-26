@@ -9,13 +9,13 @@ const searchUser = async (req, res) => {
             message:'Search cannot be empty'
         })
     }
-    let dbQuery = `SELECT user_id, 
+    let dbQuery = `SELECT user_id, profile_image,
             username, first_name, last_name FROM user_profile 
             WHERE username LIKE ? or username LIKE ?`
 
-    let dbPostQuery = `SELECT p.post_id,p.title,p.body, p.created_at, 
-    u.user_id, u.username FROM user_posts p INNER JOIN user_profile u 
-    ON p.user_id = u.user_id WHERE p.title LIKE ? OR p.title LIKE ? ORDER BY p.created_at DESC LIMIT 5`
+    let dbPostQuery = `SELECT p.post_id,p.title,p.body,t.topic_name, p.created_at, 
+    u.user_id, u.username, u.profile_image FROM user_posts p INNER JOIN user_profile u 
+    ON p.user_id = u.user_id INNER JOIN forum_topics t ON p.topic_id = t.topic_id WHERE p.title LIKE ? OR p.title LIKE ? ORDER BY p.created_at DESC LIMIT 5`
 
     let values = [`${search}%`,`%${search}%`]
     
