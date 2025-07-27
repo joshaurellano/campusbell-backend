@@ -1,5 +1,5 @@
 const pool = require ('../config/database');
-const addFrienship = require('../controller/friendController');
+const addFriendship = require('../controller/friendController');
 const sendFriendRequest = async (req,res) => {
     const {receiver_id} = req.body
 
@@ -55,7 +55,7 @@ const acceptFriendRequest = async (req,res) => {
     const user_id = req.userId
     try {
         const [update_friend_request] = await pool.query(`UPDATE friend_request SET status_id = 2 WHERE (sender_id = ? AND receiver_id = ?)`,[sender_id, user_id]);
-        await addFrienship(sender_id, user_id)
+        await addFriendship(sender_id, user_id)
 
         return res.status(200).json({
             status:'Success',
