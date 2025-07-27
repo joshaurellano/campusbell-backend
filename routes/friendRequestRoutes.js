@@ -5,6 +5,6 @@ const {sendFriendRequest, acceptFriendRequest} = require('../controller/friendRe
 const router = express.Router();
 
 router.post('/',authenticateToken,sendFriendRequest);
-router.put('/accept',authenticateToken, acceptFriendRequest);
+router.put('/accept/:id',authenticateToken, acceptFriendRequest);
 
 module.exports = router

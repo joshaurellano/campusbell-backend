@@ -1,7 +1,9 @@
 /* This Controller handle all user based functions */
 const pool = require('../config/database');
 const bcrypt = require('bcryptjs');
-const {encrypt, decrypt, hashing} = require('../middleware/encryption')
+const {checkFriendship} = require('../controller/friendController');
+const {getFriendRequest} = require('../controller/friendRequestController');
+const {encrypt, decrypt, hashing} = require('../middleware/encryption');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -125,8 +127,9 @@ const getUser = async (req, res) => {
     }
 }
 const viewUser = async (req, res) => {
-    const {id} = req.params
-
+    const {id} = req.params;
+    const user_id = req.userId;
+    let friendRequest = null;
     try {
         const [view_user] = await pool.query(`SELECT 
             up.username,
@@ -164,14 +167,23 @@ const viewUser = async (req, res) => {
                     message:'User is not available'
                 })
             }
+            const friend = await checkFriendship(id, user_id)
+
+            if (friend === false) {
+                friendRequest = await getFriendRequest(id, user_id)
+            }
+
             return res.status(200).json({
                 status:'Success',
-                result: view_user[0]
+                result: view_user[0],
+                friend,
+                friendRequest
             })
     } catch (error) {
+        console.error(error)
         return res.status(500).json({
             status:'Error',
-            message:'There wasan error fetching the user'
+            message:'There was an error fetching the user'
         })
     }
 }
