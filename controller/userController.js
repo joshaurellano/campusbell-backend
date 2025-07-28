@@ -132,6 +132,7 @@ const viewUser = async (req, res) => {
     let friendRequest = null;
     try {
         const [view_user] = await pool.query(`SELECT 
+            up.user_id,
             up.username,
             up.profile_image,
             up.first_name,
@@ -175,9 +176,7 @@ const viewUser = async (req, res) => {
 
             return res.status(200).json({
                 status:'Success',
-                result: view_user[0],
-                friend,
-                friendRequest
+                result: {...view_user[0], friend, friendRequest},
             })
     } catch (error) {
         console.error(error)

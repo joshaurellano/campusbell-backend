@@ -36,17 +36,14 @@ const getFriendRequest = async (id, user_id) => {
         const [get_request] = await pool.query(`
             SELECT fr.sender_id, fr.receiver_id, fr.status_id, rs.status_name FROM friend_request fr 
             INNER JOIN request_status rs ON fr.status_id = rs.status_id
-            WHERE (fr.sender_id = ? AND fr.receiver_id = ?) OR (fr.sender_id = ? AND fr.receiver_id = ?) AND status_id = 1`, [sender_id, receiver_id, receiver_id, sender_id ])
+            WHERE (fr.sender_id = ? AND fr.receiver_id = ?) OR (fr.sender_id = ? AND fr.receiver_id = ?) AND fr.status_id = 1`, [sender_id, receiver_id, receiver_id, sender_id ])
         if(get_request.length === 0) {
             return (null);
         }
-        console.log('senderID',sender_id,'receiverID', receiver_id)
-        console.log(get_request[0])
-        
         if(get_request[0].sender_id === parseInt(sender_id) && get_request[0].receiver_id === parseInt(receiver_id)) {
-            console.log('receiver')
             get_request[0].status_name = 'pending reply'
         }
+        
         return(get_request[0].status_name)
         
     } catch (error) {
