@@ -34,6 +34,7 @@ const getAllPost = async (req,res) => {
             dbQuery = `SELECT 
             p.post_id AS postID,
             u.username AS username,
+            u.profile_image,
             t.topic_name,
             p.title AS title,
             p.body AS content,
@@ -95,6 +96,7 @@ const getAllPost = async (req,res) => {
             dbQuery = `SELECT 
             p.post_id AS postID,
             u.username AS username,
+            u.profile_image,
             t.topic_name,
             p.title AS title,
             p.body AS content,
@@ -208,6 +210,7 @@ const getPost = async (req,res) => {
         const[get_post] = await pool.query(`SELECT 
         p.post_id AS postID,
         u.username AS username,
+        u.profile_image,
         t.topic_name,
         p.title AS title,
         p.body AS content,
@@ -288,6 +291,7 @@ const getPostBy = async (req,res) => {
     try {
         const [get_post_by] = await pool.query(`SELECT 
             u.username AS username,
+            u.profile_image,
             p.title AS title,
             p.body AS content,
             p.created_at AS date_posted,
@@ -321,6 +325,7 @@ const getPostByTopic = async (req,res) => {
         const [get_post_by_topic] = await pool.query(`SELECT 
         p.post_id AS postID,
         u.username AS username,
+        u.profile_image,
         t.topic_name,
         p.title AS title,
         p.body AS content,
