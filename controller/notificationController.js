@@ -96,7 +96,33 @@ const getAlert = async (req,res) => {
                         EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 1 AND an.is_read = FALSE) OR 
                             EXISTS(SELECT 1 FROM alert_notification an WHERE p.post_id = an.post_id AND an.notification_type = 2 AND an.is_read = FALSE) )
                     ) AS posts
-            ) AS postData, (SELECT COUNT(*) FROM alert_notification an WHERE an.notified_userid = u.user_id AND an.is_read = FALSE ) AS unreadNotif FROM user_profile u WHERE u.user_id = ?`
+            ) AS postData, (
+				SELECT JSON_ARRAYAGG(friend_req_data) FROM 
+                (
+					SELECT JSON_OBJECT 
+                    (
+						'notifID', an.notification_id,
+                        'requestor_userID', an.notifier_userid,
+                        'requestor_profileImage', ru.profile_image,
+                        'username', ru.username,
+                        'request_time', an.created_at
+                    ) AS friend_req_data FROM alert_notification an INNER JOIN user_profile ru ON an.notifier_userid = ru.user_id WHERE an.notified_userid = u.user_id AND an.notification_type = 3 AND an.is_read = FALSE
+				) AS friend_req
+            ) AS friendRequests,
+            (
+				SELECT JSON_ARRAYAGG(reqAcceptData) FROM 
+                (
+					SELECT JSON_OBJECT
+						(
+							'notifID', an.notification_id,
+							'acceptor_userID', an.notifier_userid,
+                            'acceptor_profileImage', a.profile_image,
+                            'username', a.username,
+                            'accept_time', an.created_at
+                        ) AS reqAcceptData FROM alert_notification an INNER JOIN user_profile a ON an.notifier_userid = a.user_id WHERE an.notified_userid = u.user_id AND an.notification_type = 4 AND an.is_read = FALSE
+                ) AS req_accept
+				
+            ) AS acceptedFriendRequest,(SELECT COUNT(*) FROM alert_notification an WHERE an.notified_userid = u.user_id AND an.is_read = FALSE ) AS unreadNotif FROM user_profile u WHERE u.user_id = ?`
             ,[id]);
 
         return res.status(200).json({

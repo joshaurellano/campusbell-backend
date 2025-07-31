@@ -1,15 +1,18 @@
 const pool = require ('../config/database');
 const {addFriendship} = require('../controller/friendController');
+const {addNotification} = require('../controller/notificationController');
 
 const sendFriendRequest = async (req,res) => {
-    const {receiver_id} = req.body
+    const {receiver_id} = req.body;
+    const notification_type = 3;
 
     try {
         const sender_id = req.userId;
         const status_id = 1
        
         const [send_request] = await pool.query(`INSERT INTO friend_request (sender_id, receiver_id, status_id) VALUES (?, ?, ?)`,[sender_id, receiver_id, status_id])
-
+        await addNotification(notification_type, receiver_id, sender_id)
+        
         return res.status(200).json({
             status:'Success',
             message:'Successfully sent a friend request'
@@ -62,9 +65,12 @@ const acceptFriendRequest = async (req,res) => {
     const {id} = req.params;
     const user_id = req.userId
     const sender_id = id;
+    const notification_type = 4;
+
     try {
         const [update_friend_request] = await pool.query(`UPDATE friend_request SET status_id = 2 WHERE (sender_id = ? AND receiver_id = ?)`,[sender_id, user_id]);
         await addFriendship(sender_id, user_id)
+        await addNotification(notification_type, sender_id, user_id)
 
         return res.status(200).json({
             status:'Success',
