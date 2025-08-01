@@ -1,7 +1,7 @@
 const pool = require('../config/database')
 
 const addToWall = async (req,res) => {
-    const {body, user_id} = req.body
+    const {body, user_id, anonymous} = req.body
     
     if(!body || !user_id){
         return res.status(400).json({
@@ -10,13 +10,13 @@ const addToWall = async (req,res) => {
     }
 
     try {
-        const [add_to_wall] = await pool.query(`INSERT INTO freedom_wall (body, user_id) VALUES (?,?) `,[body, user_id])
+        const [add_to_wall] = await pool.query(`INSERT INTO freedom_wall (body, user_id, anonymous) VALUES (?,?,?) `,[body, user_id,anonymous])
 
         return res.status(201).json({
             message:'User successfully added note to freedom wall'
         })
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         return res.status(500).json({
             message:'There was an error adding to freedom wall'
         })
@@ -25,8 +25,8 @@ const addToWall = async (req,res) => {
 const getAllFromWall = async (req,res) => {
     try {
         const[get_all_from_wall] = await pool.query(`
-            SELECT fw.id,fw.body, fw.user_id, u.username 
-            FROM freedom_wall fw INNER JOIN user_profile u ON fw.user_id = u.user_id`)
+            SELECT fw.id,fw.body, fw.user_id, u.username, fw.anonymous , fw.created_at 
+            FROM freedom_wall fw INNER JOIN user_profile u ON fw.user_id = u.user_id ORDER BY fw.created_at DESC`)
 
             return res.status(200).json({
                 message:'Freedom Wall notes fetched',
@@ -43,7 +43,7 @@ const getSpecificNotes = async (req,res) => {
     const {id} = req.params
     try {
         const[get_note_from_wall] = await pool.query(`
-            SELECT fw.id,fw.body, fw.user_id, u.username 
+            SELECT fw.id,fw.body, fw.anonymous, fw.created_at, fw.user_id, u.username 
             FROM freedom_wall fw INNER JOIN user_profile u ON fw.user_id = u.user_id 
             WHERE fw.id = ?`,[id])
 
