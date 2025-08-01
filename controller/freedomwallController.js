@@ -25,7 +25,7 @@ const addToWall = async (req,res) => {
 const getAllFromWall = async (req,res) => {
     try {
         const[get_all_from_wall] = await pool.query(`
-            SELECT fw.id,fw.body, fw.user_id, u.username, fw.anonymous , fw.created_at 
+            SELECT fw.id,fw.body, fw.user_id, u.username, u.profile_image,u.role_id, fw.anonymous, fw.anonymous_pfp, fw.created_at 
             FROM freedom_wall fw INNER JOIN user_profile u ON fw.user_id = u.user_id ORDER BY fw.created_at DESC`)
 
             return res.status(200).json({
