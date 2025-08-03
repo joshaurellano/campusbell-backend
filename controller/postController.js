@@ -219,6 +219,7 @@ const getPost = async (req,res) => {
         u.first_name,
         u.last_name,
         u.profile_image,
+        u.role_id,
         t.topic_name,
         p.title AS title,
         p.body AS content,
