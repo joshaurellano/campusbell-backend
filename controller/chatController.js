@@ -26,10 +26,8 @@ const getConvoID = async (req,res) => {
             })
         }
         
-
     } catch (error) {
         console.error(error)
-
         return res.status(500).json({
             status:'Error',
             message:'There was an error fetching conversation'
