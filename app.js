@@ -20,6 +20,7 @@ const freedomwallRoutes = require('./routes/freedomwallRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const friendRequestRoutes = require('./routes/friendRequestRoutes');
 const friendRoutes = require('./routes/friendRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const {clear_otp} = require('./controller/otpController');
 
@@ -61,6 +62,7 @@ app.use('/freedomwall',freedomwallRoutes);
 app.use('/search',searchRoutes);
 app.use('/request',friendRequestRoutes);
 app.use('/friend',friendRoutes);
+app.use('/chat',chatRoutes);
 
 cron.schedule ('* * * * Sunday', async () =>{
     try{

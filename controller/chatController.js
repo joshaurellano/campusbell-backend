@@ -1,10 +1,47 @@
 const pool = require ('../config/database');
 
+const getConvoID = async (req,res) => {
+    const {id} = req.params;
+    const user_id = req.userId
+    
+    try {
+        const [conversation_id] = await pool.query(`
+            SELECT conversation_id AS conversationID 
+            FROM user_conversation WHERE 
+            (first_participant_id = ? AND second_participant_id = ?) OR 
+            (first_participant_id = ? AND second_participant_id = ?)`,[user_id, id, id, user_id])
+        
+            if (conversation_id.length > 0) {
+                return res.status(200).json({
+                status:'success',
+                result: conversation_id[0].conversationID
+            })
+        } else {
+            const [create_conversation] = await pool.query(`INSERT INTO user_conversation 
+                (first_participant_id, second_participant_id) VALUES (?, ?)`, [user_id, id])
+
+            return res.status(201).json({
+                status:'Success',
+                result: create_conversation.insertId
+            })
+        }
+        
+
+    } catch (error) {
+        console.error(error)
+
+        return res.status(500).json({
+            status:'Error',
+            message:'There was an error fetching conversation'
+        })
+    }
+}
+
 const saveChat = async ( sender_id, receiver_id, message ) => {
     try {
         const [save_chat] = await pool.query (`INSERT INTO messages (receiver_id, sender_id, message) VALUES (? ,?, ?)`, [receiver_id,sender_id, message])
     } catch (error) {
-        throw (error)
+        throw (error) 
     }
 }
 
@@ -20,4 +57,4 @@ const getChat = async (sender_id, receiver_id) => {
     }
 }
 
-module.exports = {saveChat, getChat}
+module.exports = {saveChat, getChat, getConvoID}
