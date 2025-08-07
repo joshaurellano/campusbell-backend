@@ -6,6 +6,7 @@ const { saveChat, getChat } = require('./controller/chatController');
 const server = http.createServer(app);
 
 const { Server } = require("socket.io");
+const { type } = require('os');
 const io = new Server(server, {
     cors : {
 	origin: (origin, callback) => {
@@ -34,7 +35,14 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('message',(chat_details) => {
-		socket.to(socket.room_id).emit("message:",chat_details)
+		const {receiver_id, sender_id, message} = chat_details
+
+		console.log('ReceiverID', receiver_id, 'SenderID',sender_id, 'Message',message)
+		socket.to(socket.room_id).emit("message:",{
+			receiver_id, 
+			sender_id, 
+			message
+		})
 	})
 	
 	socket.on('disconnect', () => {
