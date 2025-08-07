@@ -29,20 +29,18 @@ io.on('connection', (socket) => {
     console.log(`${socket.id} user just connected`);
     
 	socket.on('join', (room_id) => {
-		socket.join(room_id);
-		socket.room_id = room_id;
-		socket.emit('user joined', room_id);
+		socket.join(room_id.room_id);
+		socket.room_id = room_id.room_id;
+		console.log('user joined room', socket.room_id)
+		socket.emit('user joined room', room_id.room_id);
 	})
 
 	socket.on('message',(chat_details) => {
 		const {receiver_id, sender_id, message} = chat_details
 
 		console.log('ReceiverID', receiver_id, 'SenderID',sender_id, 'Message',message)
-		socket.to(socket.room_id).emit("message:",{
-			receiver_id, 
-			sender_id, 
-			message
-		})
+		console.log('Chat',chat_details)
+		io.to(socket.room_id).emit("message",chat_details)
 	})
 	
 	socket.on('disconnect', () => {
