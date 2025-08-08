@@ -36,6 +36,7 @@ const getAllFriends = async (req, res) => {
                     SELECT JSON_OBJECT(
                         'user_id', f.user_id,
                         'username', f.username,
+                        'profile_img', f.profile_image,
                         'since', uf.created_at
                     ) AS friend_data FROM user_friendship uf INNER JOIN user_profile f ON uf.friend_id = f.user_id 
                     WHERE uf.user_id = u.user_id
@@ -43,6 +44,11 @@ const getAllFriends = async (req, res) => {
                 ) AS friends_info
             ) AS friends
             FROM user_profile u WHERE u.user_id = ?`,[id])
+
+            return res.status(200).json({
+                status:'Success',
+                result:get_friends
+            })
     } catch (error) {
         return res.status(500).json({
             status:'Error',
