@@ -39,8 +39,10 @@ io.on('connection', (socket) => {
 	socket.on('message', async (chat_details) => {
 		const {receiver_id, sender_id, message} = chat_details
 		await saveChat(socket.room_id, receiver_id, sender_id, message)
-		const created_at = new Date(Date.now());
-		const newChat = {...chat_details, created_at}
+		// const created_at = new Date(Date.now());
+		// const newChat = {...chat_details, created_at}
+		const chat_history = await getChat(socket.room_id);
+		socket.emit("history",chat_history);
 		io.to(socket.room_id).emit("message",newChat)
 	})
 	
