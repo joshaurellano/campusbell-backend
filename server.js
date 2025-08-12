@@ -33,15 +33,15 @@ io.on('connection', (socket) => {
 		socket.room_id = room_id.room_id;
 		socket.emit('user joined room', room_id.room_id);
 		const chat_history = await getChat(socket.room_id);
-		socket.emit("history",chat_history);
+		socket.emit("chat",chat_history);
 	})
 
 	socket.on('message', async (chat_details) => {
 		const {receiver_id, sender_id, message} = chat_details
 		await saveChat(socket.room_id, receiver_id, sender_id, message)
-		const created_at = new Date(Date.now());
-		const newChat = {...chat_details, created_at}
-		io.to(socket.room_id).emit("message",newChat)
+		const get_chat = await getChat(socket.room_id);
+		socket.emit("chat",get_chat);
+		io.to(socket.room_id).emit("message",get_chat)
 	})
 	
 	socket.on('disconnect', () => {
